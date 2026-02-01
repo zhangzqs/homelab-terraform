@@ -214,7 +214,7 @@ terraform destroy
 2. 选择 **PVE Integration Test** 工作流
 3. 点击 **Run workflow**
 4. 可选配置：
-   - `pve_version`：指定 PVE 版本（默认 8.3-1）
+   - `pve_version`：指定 PVE 版本（默认 9.1-1）
    - `skip_terraform_apply`：是否跳过 terraform apply（默认 true）
 
 ### 本地运行（需要 Linux + KVM）

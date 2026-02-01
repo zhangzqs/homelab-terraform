@@ -18,7 +18,7 @@ on:
       pve_version:
         description: 'Proxmox VE version to test'
         required: false
-        default: '8.3-1'
+        default: '9.1-1'
         type: string
       skip_terraform_apply:
         description: 'Skip terraform apply (only run init/validate/plan)'
@@ -30,7 +30,7 @@ permissions:
   contents: read
 
 env:
-  PVE_VERSION: ${{ inputs.pve_version || '8.3-1' }}
+  PVE_VERSION: ${{ inputs.pve_version || '9.1-1' }}
   PVE_PASSWORD: "Testpassword123!"
   QEMU_MEM: "4096"
   QEMU_CPUS: "2"
