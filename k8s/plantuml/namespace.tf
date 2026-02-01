@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "plantuml" {
+resource "kubernetes_namespace_v1" "plantuml" {
   metadata {
     name = "plantuml"
     labels = {

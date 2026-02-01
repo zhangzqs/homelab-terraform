@@ -1,7 +1,7 @@
-resource "kubernetes_deployment" "plantuml" {
+resource "kubernetes_deployment_v1" "plantuml" {
   metadata {
     name      = "plantuml-server"
-    namespace = kubernetes_namespace.plantuml.metadata[0].name
+    namespace = kubernetes_namespace_v1.plantuml.metadata[0].name
     labels = {
       app = "plantuml-server"
     }
@@ -50,10 +50,10 @@ resource "kubernetes_deployment" "plantuml" {
               path = "/"
               port = 8080
             }
-            initial_delay_seconds = 30
+            initial_delay_seconds = 90
             period_seconds        = 10
-            timeout_seconds       = 5
-            failure_threshold     = 3
+            timeout_seconds       = 10
+            failure_threshold     = 5
           }
 
           readiness_probe {
@@ -61,9 +61,9 @@ resource "kubernetes_deployment" "plantuml" {
               path = "/"
               port = 8080
             }
-            initial_delay_seconds = 10
-            period_seconds        = 5
-            timeout_seconds       = 3
+            initial_delay_seconds = 60
+            period_seconds        = 10
+            timeout_seconds       = 10
             failure_threshold     = 3
           }
         }

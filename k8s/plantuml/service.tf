@@ -1,7 +1,7 @@
-resource "kubernetes_service" "plantuml" {
+resource "kubernetes_service_v1" "plantuml" {
   metadata {
     name      = "plantuml-server"
-    namespace = kubernetes_namespace.plantuml.metadata[0].name
+    namespace = kubernetes_namespace_v1.plantuml.metadata[0].name
     labels = {
       app = "plantuml-server"
     }

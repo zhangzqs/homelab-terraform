@@ -1,7 +1,7 @@
-resource "kubernetes_service" "speedtest" {
+resource "kubernetes_service_v1" "speedtest" {
   metadata {
     name      = "librespeed"
-    namespace = kubernetes_namespace.speedtest.metadata[0].name
+    namespace = kubernetes_namespace_v1.speedtest.metadata[0].name
     labels = {
       app = "librespeed"
     }

@@ -35,6 +35,6 @@ resource "kubernetes_ingress_v1" "plantuml" {
   }
 
   depends_on = [
-    kubernetes_service.plantuml
+    kubernetes_service_v1.plantuml
   ]
 }

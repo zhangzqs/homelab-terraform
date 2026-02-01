@@ -35,6 +35,6 @@ resource "kubernetes_ingress_v1" "speedtest" {
   }
 
   depends_on = [
-    kubernetes_service.speedtest
+    kubernetes_service_v1.speedtest
   ]
 }
