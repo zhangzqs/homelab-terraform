@@ -197,6 +197,41 @@ terraform destroy
 ```
 <!-- tokei-end -->
 
+## 🧪 集成测试 (CI)
+
+本项目提供了一个基于 GitHub Actions 的集成测试工作流，可以使用 QEMU-KVM 在 CI 环境中自动启动一个 Proxmox VE 虚拟机，并针对该虚拟机运行 Terraform 部署测试。
+
+### 工作流特性
+
+- **自动化 PVE 安装**：使用 Proxmox VE 自动安装器 (PVE 8.1+) 进行无人值守安装
+- **QEMU-KVM 虚拟化**：支持 KVM 加速（如果可用），否则回退到 TCG 模拟
+- **完整测试流程**：包括 Terraform init、validate 和 plan 测试
+- **可选 apply 测试**：可以选择性地执行完整的 Terraform apply
+
+### 手动触发测试
+
+1. 进入 GitHub 仓库的 **Actions** 页面
+2. 选择 **PVE Integration Test** 工作流
+3. 点击 **Run workflow**
+4. 可选配置：
+   - `pve_version`：指定 PVE 版本（默认 8.3-1）
+   - `skip_terraform_apply`：是否跳过 terraform apply（默认 true）
+
+### 本地运行（需要 Linux + KVM）
+
+```bash
+# 安装依赖
+sudo apt-get install qemu-system-x86 qemu-utils ovmf
+
+# 参考 .github/workflows/integration-test.yml 中的步骤
+```
+
+### 注意事项
+
+- 此工作流资源密集，完整运行可能需要 30-60 分钟
+- 建议仅在需要时手动触发，而不是在每次 PR 时运行
+- 日志和测试结果会作为 Artifacts 上传，保留 14 天
+
 ## 📄 许可证
 
 本项目采用 [MIT License](LICENSE) 开源协议。

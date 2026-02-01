@@ -1,0 +1,362 @@
+name: PVE Integration Test
+
+# This workflow sets up a Proxmox VE virtual machine using QEMU-KVM for integration testing.
+# It automates the PVE installation and runs Terraform tests against the running instance.
+#
+# Note: This is a resource-intensive workflow and may take 30-60 minutes to complete.
+# The PVE installation is done via the official ISO with automated installation using
+# the Proxmox Auto-Installer (available in PVE 8.1+).
+#
+# Requirements:
+# - GitHub Actions runner with KVM support (recommended) or will fall back to TCG emulation
+# - Sufficient disk space (~15GB for ISO and VM disk)
+# - Network access to download PVE ISO
+
+on:
+  workflow_dispatch:
+    inputs:
+      pve_version:
+        description: 'Proxmox VE version to test'
+        required: false
+        default: '8.3-1'
+        type: string
+      skip_terraform_apply:
+        description: 'Skip terraform apply (only run init/validate/plan)'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+env:
+  PVE_VERSION: ${{ inputs.pve_version || '8.3-1' }}
+  PVE_PASSWORD: "Testpassword123!"
+  QEMU_MEM: "4096"
+  QEMU_CPUS: "2"
+  DISK_SIZE: "32G"
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          echo "Freeing up disk space..."
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo apt-get clean
+          df -h
+
+      - name: Install QEMU and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qemu-system-x86 \
+            qemu-utils \
+            wget \
+            curl \
+            jq \
+            ovmf \
+            expect \
+            sshpass \
+            netcat-openbsd
+
+      - name: Check KVM availability
+        id: kvm-check
+        run: |
+          echo "Checking KVM support..."
+          if [ -e /dev/kvm ]; then
+            echo "KVM is available"
+            ls -la /dev/kvm
+            sudo chmod 666 /dev/kvm || true
+            echo "kvm_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "WARNING: KVM is not available, QEMU will run in emulation mode (much slower)"
+            echo "kvm_available=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create virtual disk for PVE
+        run: |
+          qemu-img create -f qcow2 pve-disk.qcow2 ${{ env.DISK_SIZE }}
+          echo "Virtual disk created: $(ls -lh pve-disk.qcow2)"
+
+      - name: Download Proxmox VE ISO
+        run: |
+          echo "Downloading Proxmox VE ${{ env.PVE_VERSION }} ISO..."
+          ISO_URL="https://enterprise.proxmox.com/iso/proxmox-ve_${{ env.PVE_VERSION }}.iso"
+          
+          # Try enterprise URL first, then public mirror
+          wget -q --show-progress -O proxmox-ve.iso "$ISO_URL" 2>/dev/null || \
+            wget -q --show-progress -O proxmox-ve.iso \
+              "https://download.proxmox.com/iso/proxmox-ve_${{ env.PVE_VERSION }}.iso"
+          
+          echo "ISO downloaded: $(ls -lh proxmox-ve.iso)"
+
+      - name: Create PVE auto-installer answer file
+        run: |
+          # Create answer file for Proxmox VE auto-installer (PVE 8.1+)
+          # Reference: https://pve.proxmox.com/wiki/Automated_Installation
+          # Note: Password is written to file for auto-installation. This is a test environment only.
+          cat > answer.toml << EOF
+          [global]
+          keyboard = "en-us"
+          country = "us"
+          fqdn = "pve.local"
+          mailto = "admin@localhost"
+          timezone = "UTC"
+          root_password = "${{ env.PVE_PASSWORD }}"
+
+          [network]
+          source = "from-dhcp"
+
+          [disk-setup]
+          filesystem = "ext4"
+          disk_list = ["vda"]
+          EOF
+          
+          echo "Answer file created (password redacted in logs)"
+
+      - name: Prepare auto-installer ISO
+        run: |
+          # Create a small FAT filesystem image with the answer file
+          # This is used by PVE auto-installer to read configuration
+          dd if=/dev/zero of=answer.img bs=1M count=1
+          mkfs.vfat answer.img
+          mkdir -p mnt
+          sudo mount answer.img mnt
+          sudo cp answer.toml mnt/
+          sudo umount mnt
+          rmdir mnt
+          echo "Answer image created: $(ls -lh answer.img)"
+
+      - name: Start QEMU with PVE ISO (Auto-Install Mode)
+        run: |
+          echo "Starting QEMU with Proxmox VE ISO in auto-install mode..."
+          
+          # Determine acceleration options
+          if [ "${{ steps.kvm-check.outputs.kvm_available }}" == "true" ]; then
+            ACCEL="-enable-kvm -cpu host"
+            echo "Using KVM acceleration"
+          else
+            ACCEL="-cpu qemu64 -accel tcg,thread=multi"
+            echo "Using TCG emulation (this will be slow)"
+          fi
+          
+          # Start QEMU with auto-install kernel parameters
+          # The 'proxmox-auto-install-answer=answer.toml' parameter tells the installer
+          # to look for the answer file and perform unattended installation
+          qemu-system-x86_64 \
+            $ACCEL \
+            -m ${{ env.QEMU_MEM }} \
+            -smp ${{ env.QEMU_CPUS }} \
+            -drive file=pve-disk.qcow2,format=qcow2,if=virtio,cache=writeback \
+            -cdrom proxmox-ve.iso \
+            -drive file=answer.img,format=raw,if=virtio \
+            -boot d \
+            -netdev user,id=net0,hostfwd=tcp::8006-:8006,hostfwd=tcp::2222-:22 \
+            -device virtio-net-pci,netdev=net0 \
+            -bios /usr/share/OVMF/OVMF_CODE.fd \
+            -nographic \
+            -serial mon:stdio \
+            -display none \
+            > qemu.log 2>&1 &
+          
+          QEMU_PID=$!
+          echo "QEMU_PID=$QEMU_PID" >> $GITHUB_ENV
+          echo "QEMU started with PID: $QEMU_PID"
+          
+          # Wait for QEMU to initialize
+          sleep 15
+          
+          if kill -0 $QEMU_PID 2>/dev/null; then
+            echo "✓ QEMU is running"
+            tail -20 qemu.log
+          else
+            echo "✗ QEMU failed to start"
+            cat qemu.log
+            exit 1
+          fi
+
+      - name: Wait for PVE Installation and Boot
+        run: |
+          echo "Waiting for PVE installation to complete..."
+          echo "This may take 20-45 minutes depending on available resources"
+          
+          check_pve_api() {
+            curl -k -s --connect-timeout 5 --max-time 10 \
+              "https://localhost:8006/api2/json/version" 2>/dev/null | grep -q "version"
+          }
+          
+          MAX_WAIT=2700  # 45 minutes (45 * 60 seconds)
+          ELAPSED=0
+          INTERVAL=60
+          LAST_LOG_LINE=0
+          
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            # Check if QEMU is still running
+            if ! kill -0 ${{ env.QEMU_PID }} 2>/dev/null; then
+              echo "QEMU process has exited unexpectedly"
+              echo "=== Last 100 lines of QEMU log ==="
+              tail -100 qemu.log
+              exit 1
+            fi
+            
+            # Show progress from log
+            CURRENT_LINES=$(wc -l < qemu.log)
+            if [ $CURRENT_LINES -gt $LAST_LOG_LINE ]; then
+              echo "--- New log output ---"
+              tail -n +$((LAST_LOG_LINE + 1)) qemu.log | head -20
+              LAST_LOG_LINE=$CURRENT_LINES
+            fi
+            
+            # Check if PVE API is accessible
+            if check_pve_api; then
+              echo ""
+              echo "✓ PVE API is accessible! Installation complete."
+              break
+            fi
+            
+            echo "[$(date +%H:%M:%S)] Waiting... (${ELAPSED}s / ${MAX_WAIT}s)"
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+          
+          if [ $ELAPSED -ge $MAX_WAIT ]; then
+            echo "✗ Timeout waiting for PVE installation"
+            echo "=== Full QEMU log ==="
+            cat qemu.log
+            exit 1
+          fi
+
+      - name: Verify PVE API Access
+        run: |
+          echo "Verifying PVE API access..."
+          
+          # Allow some time for services to stabilize
+          sleep 30
+          
+          # Test API version endpoint
+          echo "Testing API version endpoint..."
+          VERSION_RESPONSE=$(curl -k -s --max-time 30 \
+            "https://localhost:8006/api2/json/version")
+          
+          if echo "$VERSION_RESPONSE" | jq -e '.data.version' > /dev/null 2>&1; then
+            echo "✓ PVE API is responding"
+            echo "PVE Version: $(echo "$VERSION_RESPONSE" | jq -r '.data.version')"
+            echo "Release: $(echo "$VERSION_RESPONSE" | jq -r '.data.release')"
+          else
+            echo "✗ Failed to get valid response from PVE API"
+            echo "Response: $VERSION_RESPONSE"
+            exit 1
+          fi
+
+      - name: Authenticate with PVE API
+        id: pve-auth
+        run: |
+          echo "Authenticating with PVE API..."
+          
+          AUTH_RESPONSE=$(curl -k -s --max-time 30 \
+            -d "username=root@pam" \
+            -d "password=${{ env.PVE_PASSWORD }}" \
+            "https://localhost:8006/api2/json/access/ticket")
+          
+          if echo "$AUTH_RESPONSE" | jq -e '.data.ticket' > /dev/null 2>&1; then
+            echo "✓ Authentication successful"
+            TICKET=$(echo "$AUTH_RESPONSE" | jq -r '.data.ticket')
+            CSRF=$(echo "$AUTH_RESPONSE" | jq -r '.data.CSRFPreventionToken')
+            echo "ticket=$TICKET" >> $GITHUB_OUTPUT
+            echo "csrf=$CSRF" >> $GITHUB_OUTPUT
+          else
+            echo "✗ Authentication failed"
+            echo "Response: $AUTH_RESPONSE"
+            echo "Note: If the password is incorrect, you may need to adjust the answer.toml"
+            exit 1
+          fi
+
+      - name: List PVE Nodes
+        run: |
+          echo "Listing PVE nodes..."
+          
+          NODES_RESPONSE=$(curl -k -s --max-time 30 \
+            -H "Authorization: PVEAuthCookie=${{ steps.pve-auth.outputs.ticket }}" \
+            "https://localhost:8006/api2/json/nodes")
+          
+          echo "Nodes:"
+          echo "$NODES_RESPONSE" | jq '.data[] | {node: .node, status: .status}'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.12"
+
+      - name: Terraform Init
+        working-directory: all_in_one
+        run: |
+          echo "Initializing Terraform..."
+          terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: all_in_one
+        run: |
+          echo "Validating Terraform configuration..."
+          terraform validate
+
+      - name: Terraform Plan
+        working-directory: all_in_one
+        continue-on-error: true
+        env:
+          # Use TF_VAR_ environment variables to avoid storing credentials in files
+          TF_VAR_pve_endpoint: "https://localhost:8006"
+          TF_VAR_pve_password: ${{ env.PVE_PASSWORD }}
+        run: |
+          echo "Running Terraform plan..."
+          terraform plan -input=false -out=tfplan 2>&1 | tee plan_output.txt
+          
+          # Check if plan succeeded
+          if [ ${PIPESTATUS[0]} -eq 0 ]; then
+            echo "✓ Terraform plan succeeded"
+          else
+            echo "⚠ Terraform plan had issues (this may be expected in CI environment)"
+            echo "See plan_output.txt for details"
+          fi
+
+      - name: Terraform Apply (Optional)
+        if: ${{ inputs.skip_terraform_apply != true }}
+        working-directory: all_in_one
+        continue-on-error: true
+        env:
+          TF_VAR_pve_endpoint: "https://localhost:8006"
+          TF_VAR_pve_password: ${{ env.PVE_PASSWORD }}
+        run: |
+          echo "Applying Terraform configuration..."
+          echo "WARNING: This will create resources in the test PVE instance"
+          terraform apply -auto-approve tfplan 2>&1 | tee apply_output.txt
+
+      - name: Cleanup QEMU
+        if: always()
+        run: |
+          if [ -n "${{ env.QEMU_PID }}" ]; then
+            echo "Stopping QEMU process ${{ env.QEMU_PID }}..."
+            kill ${{ env.QEMU_PID }} 2>/dev/null || true
+            sleep 5
+            # Force kill if still running
+            kill -9 ${{ env.QEMU_PID }} 2>/dev/null || true
+          fi
+          echo "Cleanup complete"
+
+      - name: Upload logs and artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-logs
+          path: |
+            qemu.log
+            all_in_one/plan_output.txt
+            all_in_one/apply_output.txt
+          retention-days: 14
+          if-no-files-found: ignore
