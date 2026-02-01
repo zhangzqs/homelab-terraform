@@ -178,10 +178,10 @@ resource "null_resource" "manage_ssh_keys" {
   depends_on = [proxmox_virtual_environment_vm.k3s_master]
 
   triggers = {
-    version        = 1
-    vm_res_id      = proxmox_virtual_environment_vm.k3s_master.id
-    ssh_keys_hash  = sha256(jsonencode(var.additional_ssh_keys))
-    terraform_key  = sha256(tls_private_key.vm_key.public_key_openssh)
+    version       = 1
+    vm_res_id     = proxmox_virtual_environment_vm.k3s_master.id
+    ssh_keys_hash = sha256(jsonencode(var.additional_ssh_keys))
+    terraform_key = sha256(tls_private_key.vm_key.public_key_openssh)
   }
 
   provisioner "file" {

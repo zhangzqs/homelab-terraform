@@ -11,10 +11,10 @@ resource "null_resource" "validate_proxy_sources" {
 # 验证生成的配置包含必要的字段
 locals {
   # 检查解析后的配置是否包含必要的字段
-  has_mode           = contains(keys(local.config_parsed), "mode")
-  has_listeners      = contains(keys(local.config_parsed), "listeners")
-  has_rules          = contains(keys(local.config_parsed), "rules")
-  has_proxy_groups   = contains(keys(local.config_parsed), "proxy-groups")
+  has_mode         = contains(keys(local.config_parsed), "mode")
+  has_listeners    = contains(keys(local.config_parsed), "listeners")
+  has_rules        = contains(keys(local.config_parsed), "rules")
+  has_proxy_groups = contains(keys(local.config_parsed), "proxy-groups")
 
   # 检查是否有代理组
   proxy_groups_count = try(length(local.config_parsed["proxy-groups"]), 0)
