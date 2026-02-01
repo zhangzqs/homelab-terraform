@@ -173,6 +173,50 @@ resource "null_resource" "configure_k3s_proxy" {
   }
 }
 
+# 动态管理 SSH 公钥
+resource "null_resource" "manage_ssh_keys" {
+  depends_on = [proxmox_virtual_environment_vm.k3s_master]
+
+  triggers = {
+    version        = 1
+    vm_res_id      = proxmox_virtual_environment_vm.k3s_master.id
+    ssh_keys_hash  = sha256(jsonencode(var.additional_ssh_keys))
+    terraform_key  = sha256(tls_private_key.vm_key.public_key_openssh)
+  }
+
+  provisioner "file" {
+    content = templatefile("${path.module}/scripts/manage_ssh_keys.sh.tpl", {
+      terraform_key   = trimspace(tls_private_key.vm_key.public_key_openssh)
+      additional_keys = var.additional_ssh_keys
+    })
+    destination = "/tmp/manage_ssh_keys.sh"
+
+    connection {
+      type        = "ssh"
+      user        = "root"
+      host        = var.ipv4_address
+      private_key = tls_private_key.vm_key.private_key_pem
+      timeout     = "5m"
+    }
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      user        = "root"
+      host        = var.ipv4_address
+      private_key = tls_private_key.vm_key.private_key_pem
+      timeout     = "5m"
+    }
+
+    inline = [
+      "chmod +x /tmp/manage_ssh_keys.sh",
+      "/tmp/manage_ssh_keys.sh",
+      "rm -f /tmp/manage_ssh_keys.sh"
+    ]
+  }
+}
+
 # 获取 K3s kubeconfig
 data "external" "kubeconfig" {
   depends_on = [null_resource.configure_k3s_proxy]

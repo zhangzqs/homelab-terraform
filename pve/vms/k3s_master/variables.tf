@@ -87,3 +87,9 @@ variable "containerd_proxy" {
   })
   default = null
 }
+
+variable "additional_ssh_keys" {
+  description = "额外的 SSH 公钥列表 (运行时动态配置)"
+  type        = list(string)
+  default     = []
+}
