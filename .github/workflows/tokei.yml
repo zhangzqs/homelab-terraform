@@ -18,11 +18,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-tokei-14.0.0
+
       - name: Install tokei
         run: |
           set -e
-          curl -sSL https://github.com/XAMPPRocky/tokei/releases/latest/download/tokei-x86_64-unknown-linux-gnu.tar.gz | tar xz
-          sudo mv tokei /usr/local/bin/
+          if ! command -v tokei &> /dev/null; then
+            cargo install tokei --version 14.0.0
+          fi
 
       - name: Generate code statistics
         run: |
