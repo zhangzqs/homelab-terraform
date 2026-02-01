@@ -28,16 +28,41 @@ jobs:
           tokei --output json > tokei.json
           tokei > tokei.txt
 
+      - name: Update README with code statistics
+        run: |
+          python3 << 'EOF'
+          import re
+
+          with open('README.md', 'r', encoding='utf-8') as f:
+              content = f.read()
+
+          with open('tokei.txt', 'r', encoding='utf-8') as f:
+              tokei_output = f.read().strip()
+
+          # Pattern to match the code statistics section
+          pattern = r'(<!-- tokei-start -->).*?(<!-- tokei-end -->)'
+          replacement = f'<!-- tokei-start -->\n```\n{tokei_output}\n```\n<!-- tokei-end -->'
+
+          if '<!-- tokei-start -->' in content:
+              new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+          else:
+              # If section doesn't exist, don't modify
+              new_content = content
+
+          with open('README.md', 'w', encoding='utf-8') as f:
+              f.write(new_content)
+          EOF
+
       - name: Commit and push statistics
         run: |
           set -e
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add tokei.json tokei.txt
+          git add tokei.json tokei.txt README.md
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Update code statistics [skip ci]"
+            git commit -m "docs: update code statistics [skip ci]"
             git fetch origin master
             git rebase origin/master || { echo "Rebase failed, skipping push"; exit 0; }
             git push
