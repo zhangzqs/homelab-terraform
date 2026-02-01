@@ -1,0 +1,57 @@
+name: "Copilot Setup Steps"
+
+# Automatically run the setup steps when they are changed to allow for easy validation, and
+# allow manual testing through the repository's "Actions" tab
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    # Set the permissions to the lowest permissions possible needed for your steps.
+    # Copilot will be given its own token for its operations.
+    permissions:
+      contents: read
+
+    env:
+      # UV_INDEX_URL: https://pypi.org/simple
+      PYTHON_VERSION: "3.11"
+      PADDLEX_MODELS_CACHE_VERSION: "v1"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            ~/.local/share/uv
+            ./.venv
+          key: ${{ runner.os }}-uv-python-${{ env.PYTHON_VERSION }}-${{ hashFiles('uv.lock') }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install graphviz
+        run: sudo apt-get install graphviz
+
+      - name: Cache PaddleX models
+        uses: actions/cache@v4
+        with:
+          path: ~/.paddlex/official_models
+          key: ${{ runner.os }}-paddlex-official-models-${{ env.PADDLEX_MODELS_CACHE_VERSION }}
+
+      - name: Install dependencies
+        run: uv sync --group dev
