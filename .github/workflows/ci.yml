@@ -48,14 +48,14 @@ jobs:
       - name: Terraform Init and Validate
         run: |
           set -e
-          # Find all directories containing .tf files
+          # Find all directories containing .tf files, excluding 'common' directories
           while IFS= read -r dir; do
             echo "=== Initializing and validating: $dir ==="
             pushd "$dir" > /dev/null
             terraform init -backend=false
             terraform validate
             popd > /dev/null
-          done < <(find . -name "*.tf" -type f -exec dirname {} \; | sort -u)
+          done < <(find . -name "*.tf" -type f -exec dirname {} \; | grep -v '/common$' | sort -u)
 
   tokei:
     runs-on: ubuntu-latest
@@ -77,7 +77,6 @@ jobs:
       - name: Generate code statistics
         run: |
           set -e
-          tokei --output json > tokei.json
           tokei > tokei.txt
 
       - name: Update README with code statistics
@@ -110,7 +109,7 @@ jobs:
           set -e
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add tokei.json tokei.txt README.md
+          git add README.md
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
