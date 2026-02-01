@@ -3,7 +3,7 @@ name: Tokei Code Statistics
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 permissions:
