@@ -28,8 +28,7 @@ jobs:
         run: |
           set -e
           # Find all directories containing .tf files
-          TF_DIRS=$(find . -name "*.tf" -type f | xargs dirname | sort -u)
-          for dir in $TF_DIRS; do
+          find . -name "*.tf" -type f -exec dirname {} \; | sort -u | while IFS= read -r dir; do
             echo "=== Initializing and validating: $dir ==="
             cd "$dir"
             terraform init -backend=false
