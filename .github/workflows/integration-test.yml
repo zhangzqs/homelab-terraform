@@ -160,7 +160,7 @@ jobs:
             -boot d \
             -netdev user,id=net0,hostfwd=tcp::8006-:8006,hostfwd=tcp::2222-:22 \
             -device virtio-net-pci,netdev=net0 \
-            -bios /usr/share/OVMF/OVMF_CODE.fd \
+            -bios /usr/share/OVMF/OVMF_CODE_4M.fd \
             -nographic \
             -serial mon:stdio \
             -display none \
