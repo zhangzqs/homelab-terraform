@@ -19,7 +19,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: latest
+          terraform_version: "1.12"
 
       - name: Check Terraform formatting
         run: terraform fmt -recursive -check
@@ -28,10 +28,10 @@ jobs:
         run: |
           set -e
           # Find all directories containing .tf files
-          find . -name "*.tf" -type f -exec dirname {} \; | sort -u | while IFS= read -r dir; do
+          while IFS= read -r dir; do
             echo "=== Initializing and validating: $dir ==="
-            cd "$dir"
+            pushd "$dir" > /dev/null
             terraform init -backend=false
             terraform validate
-            cd - > /dev/null
-          done
+            popd > /dev/null
+          done < <(find . -name "*.tf" -type f -exec dirname {} \; | sort -u)
