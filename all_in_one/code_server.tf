@@ -15,4 +15,9 @@ module "pve_lxc_instance_code_server" {
   ipv4_address      = local.pve_ipv4_address_lxc_code_server
   ipv4_address_cidr = 24
   ipv4_gateway      = local.pve_default_ipv4_gateway
+
+  install_proxy = {
+    http_proxy  = local.mihomo_http_proxy_address
+    https_proxy = local.mihomo_http_proxy_address
+  }
 }

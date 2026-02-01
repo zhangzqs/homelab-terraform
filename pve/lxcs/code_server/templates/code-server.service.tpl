@@ -9,8 +9,9 @@ WorkingDirectory=${working_dir}
 ExecStart=/usr/bin/code-server --config ${working_dir}/config.yaml ${working_dir}
 Restart=always
 RestartSec=5
-StandardOutput=append:${working_dir}/code-server.log
-StandardError=append:${working_dir}/code-server.log
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=code-server
 
 [Install]
 WantedBy=multi-user.target

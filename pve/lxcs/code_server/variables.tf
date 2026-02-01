@@ -50,7 +50,16 @@ variable "code_server_password" {
 }
 
 variable "code_server_port" {
-  description = "code-server监听端口"
+  description = "code-server 监听端口"
   type        = number
   default     = 8080
+}
+
+variable "install_proxy" {
+  description = "code-server 安装时使用的代理配置"
+  type = object({
+    http_proxy  = string
+    https_proxy = string
+  })
+  default = null
 }

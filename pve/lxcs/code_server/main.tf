@@ -85,9 +85,9 @@ resource "null_resource" "setup_container" {
   ]
 
   triggers = {
-    vm_id      = proxmox_virtual_environment_container.code_server_container.id
-    created_at = "2026-02-01 09:00"
-    file_hash  = filesha256("${path.module}/scripts/setup.sh")
+    res_vm_id = proxmox_virtual_environment_container.code_server_container.id
+    version   = 1
+    file_hash = filesha256("${path.module}/scripts/setup.sh")
   }
 
   provisioner "file" {
@@ -120,6 +120,48 @@ resource "null_resource" "setup_container" {
   }
 }
 
+resource "null_resource" "install_code_server" {
+  depends_on = [
+    null_resource.setup_container
+  ]
+
+  triggers = {
+    res_vm_id    = proxmox_virtual_environment_container.code_server_container.id
+    version      = 1
+    script_hash  = sha256(local.install_code_server_script)
+    proxy_config = sha256(jsonencode(var.install_proxy))
+  }
+
+  provisioner "file" {
+    content     = local.install_code_server_script
+    destination = "/tmp/install-code-server.sh"
+
+    connection {
+      type        = "ssh"
+      user        = "root"
+      host        = var.ipv4_address
+      private_key = tls_private_key.container_key.private_key_pem
+      timeout     = "5m"
+    }
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      user        = "root"
+      host        = var.ipv4_address
+      private_key = tls_private_key.container_key.private_key_pem
+      timeout     = "5m"
+    }
+
+    inline = [
+      "chmod +x /tmp/install-code-server.sh",
+      "/tmp/install-code-server.sh",
+      "rm -f /tmp/install-code-server.sh",
+    ]
+  }
+}
+
 locals {
   code_server_password = var.code_server_password != "" ? var.code_server_password : random_password.code_server_password[0].result
 
@@ -132,16 +174,24 @@ locals {
   code_server_service_content = templatefile("${path.module}/templates/code-server.service.tpl", {
     working_dir = var.working_dir,
   })
+
+  install_code_server_script = templatefile("${path.module}/scripts/install-code-server.sh.tpl", {
+    has_proxy   = var.install_proxy != null
+    http_proxy  = var.install_proxy != null ? var.install_proxy.http_proxy : ""
+    https_proxy = var.install_proxy != null ? var.install_proxy.https_proxy : ""
+  })
 }
 
 resource "null_resource" "setup_code_server_config" {
   depends_on = [
-    null_resource.setup_container
+    null_resource.install_code_server
   ]
 
   triggers = {
-    vm_id       = proxmox_virtual_environment_container.code_server_container.id
-    config_hash = sha256(local.code_server_config_content)
+    install_code_server_id = null_resource.install_code_server.id
+    res_vm_id              = proxmox_virtual_environment_container.code_server_container.id
+    version                = 1
+    config_hash            = sha256(local.code_server_config_content)
   }
 
   provisioner "file" {
@@ -165,7 +215,7 @@ resource "null_resource" "setup_systemd_service" {
 
   triggers = {
     version      = 1
-    vm_id        = proxmox_virtual_environment_container.code_server_container.id // 容器重建时重建 service
+    res_vm_id    = proxmox_virtual_environment_container.code_server_container.id // 容器重建时重建 service
     config_hash  = sha256(local.code_server_config_content)                       // 配置变更时重启服务
     service_hash = sha256(local.code_server_service_content)                      // service 文件变更时重启服务
   }
