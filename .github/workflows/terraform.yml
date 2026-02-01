@@ -1,0 +1,38 @@
+name: Terraform Checks
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: Check Terraform formatting
+        run: terraform fmt -recursive -check
+
+      - name: Terraform Init and Validate
+        run: |
+          set -e
+          # Find all directories containing .tf files
+          TF_DIRS=$(find . -name "*.tf" -type f | xargs dirname | sort -u)
+          for dir in $TF_DIRS; do
+            echo "=== Initializing and validating: $dir ==="
+            cd "$dir"
+            terraform init -backend=false
+            terraform validate
+            cd - > /dev/null
+          done
