@@ -1,5 +1,3 @@
-
-
 output "vm_password" {
   value       = random_password.vm_password.result
   description = "虚拟机 root 用户的密码"

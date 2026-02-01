@@ -138,6 +138,24 @@ resource "null_resource" "configure_k3s_proxy" {
     proxy_config = sha256(jsonencode(var.containerd_proxy))
   }
 
+  provisioner "file" {
+    content = templatefile("${path.module}/scripts/configure_k3s_proxy.sh.tpl", {
+      has_proxy   = var.containerd_proxy != null
+      http_proxy  = var.containerd_proxy != null ? var.containerd_proxy.http_proxy : ""
+      https_proxy = var.containerd_proxy != null ? var.containerd_proxy.https_proxy : ""
+      no_proxy    = var.containerd_proxy != null ? var.containerd_proxy.no_proxy : ""
+    })
+    destination = "/tmp/configure_k3s_proxy.sh"
+
+    connection {
+      type        = "ssh"
+      user        = "root"
+      host        = var.ipv4_address
+      private_key = tls_private_key.vm_key.private_key_pem
+      timeout     = "5m"
+    }
+  }
+
   provisioner "remote-exec" {
     connection {
       type        = "ssh"
@@ -147,24 +165,10 @@ resource "null_resource" "configure_k3s_proxy" {
       timeout     = "5m"
     }
 
-    inline = var.containerd_proxy != null ? [
-      # 有代理配置：上传配置文件
-      "cat > /etc/systemd/system/k3s.service.env <<'EOF'",
-      "CONTAINERD_HTTP_PROXY=${var.containerd_proxy.http_proxy}",
-      "CONTAINERD_HTTPS_PROXY=${var.containerd_proxy.https_proxy}",
-      "CONTAINERD_NO_PROXY=${var.containerd_proxy.no_proxy}",
-      "EOF",
-      "systemctl daemon-reload",
-      "systemctl restart k3s",
-      "sleep 5",
-      "systemctl status k3s --no-pager || true",
-      ] : [
-      # 无代理配置：删除配置文件
-      "rm -f /etc/systemd/system/k3s.service.env",
-      "systemctl daemon-reload",
-      "systemctl restart k3s",
-      "sleep 5",
-      "systemctl status k3s --no-pager || true",
+    inline = [
+      "chmod +x /tmp/configure_k3s_proxy.sh",
+      "/tmp/configure_k3s_proxy.sh",
+      "rm -f /tmp/configure_k3s_proxy.sh"
     ]
   }
 }
@@ -173,26 +177,10 @@ resource "null_resource" "configure_k3s_proxy" {
 data "external" "kubeconfig" {
   depends_on = [null_resource.configure_k3s_proxy]
 
-  program = ["bash", "-c", <<-EOT
-    set -e
-
-    # 创建临时 SSH 密钥文件
-    SSH_KEY_FILE=$(mktemp)
-    trap "rm -f $SSH_KEY_FILE" EXIT
-
-    echo '${tls_private_key.vm_key.private_key_openssh}' > $SSH_KEY_FILE
-    chmod 600 $SSH_KEY_FILE
-
-    # 通过 SSH 获取 kubeconfig
-    KUBECONFIG_CONTENT=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-      -i $SSH_KEY_FILE root@${var.ipv4_address} \
-      "cat /etc/rancher/k3s/k3s.yaml" 2>/dev/null)
-
-    # 替换 IP 地址
-    KUBECONFIG_CONTENT=$(echo "$KUBECONFIG_CONTENT" | sed 's/127.0.0.1/${var.ipv4_address}/g')
-
-    # 使用 Python 输出 JSON（大多数系统都有 Python）
-    python3 -c "import json; print(json.dumps({'kubeconfig': '''$KUBECONFIG_CONTENT'''}))"
-  EOT
+  program = [
+    "bash",
+    "${path.module}/scripts/get_kubeconfig.sh",
+    tls_private_key.vm_key.private_key_openssh,
+    var.ipv4_address
   ]
 }
