@@ -7,6 +7,7 @@ packages:
   - openssh-server
   - htop
   - qemu-guest-agent
+  - nfs-common
 
 apt:
   sources_list: |

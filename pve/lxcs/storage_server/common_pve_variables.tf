@@ -1,0 +1,1 @@
+../../common/common_pve_variables.tf

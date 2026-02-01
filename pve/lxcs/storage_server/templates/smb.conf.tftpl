@@ -1,0 +1,35 @@
+[global]
+   workgroup = ${workgroup}
+   server string = ${server_string}
+   security = user
+   map to guest = Bad User
+   server min protocol = SMB2
+   dns proxy = no
+   log file = /var/log/samba/%%m.log
+   max log size = 50
+
+   # 禁用打印机服务
+   load printers = no
+   printing = bsd
+   printcap name = /dev/null
+   disable spoolss = yes
+
+%{~ for share in shares ~}
+[${share.name}]
+   comment = ${share.comment != null ? share.comment : "Network Storage"}
+   path = ${share.path}
+   browseable = ${share.browseable != null ? (share.browseable ? "yes" : "no") : "yes"}
+   read only = ${share.read_only != null ? (share.read_only ? "yes" : "no") : "no"}
+   guest ok = ${share.guest_ok != null ? (share.guest_ok ? "yes" : "no") : "yes"}
+   create mask = ${share.create_mask != null ? share.create_mask : "0777"}
+   directory mask = ${share.directory_mask != null ? share.directory_mask : "0777"}
+   force user = root
+   force group = root
+%{~ if share.valid_users != null ~}
+   valid users = ${join(" ", share.valid_users)}
+%{~ endif ~}
+%{~ if share.allowed_hosts != null ~}
+   hosts allow = ${share.allowed_hosts}
+%{~ endif ~}
+
+%{~ endfor ~}
