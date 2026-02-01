@@ -1,0 +1,1 @@
+../common/common_k8s_provider.tf
