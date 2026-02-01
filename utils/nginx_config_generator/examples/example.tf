@@ -16,10 +16,10 @@ module "nginx_config" {
     portainer_nodes = {
       servers = [
         {
-          address    = "192.168.1.100"
-          port       = 9000
-          max_fails  = 3
-          weight     = 1
+          address   = "192.168.1.100"
+          port      = 9000
+          max_fails = 3
+          weight    = 1
         }
       ]
       keepalive = 32
@@ -28,8 +28,8 @@ module "nginx_config" {
     grafana_nodes = {
       servers = [
         {
-          address    = "192.168.1.100"
-          port       = 3000
+          address = "192.168.1.100"
+          port    = 3000
         }
       ]
     }
@@ -72,11 +72,11 @@ module "nginx_config" {
 
   # SSL通用配置
   ssl_common_config = {
-    protocols               = "TLSv1.2 TLSv1.3"
-    ciphers                 = "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256"
-    prefer_server_ciphers   = true
-    session_cache           = "shared:SSL:10m"
-    session_timeout         = "10m"
+    protocols             = "TLSv1.2 TLSv1.3"
+    ciphers               = "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256"
+    prefer_server_ciphers = true
+    session_cache         = "shared:SSL:10m"
+    session_timeout       = "10m"
   }
 }
 

@@ -53,14 +53,14 @@ variable "upstreams" {
   description = "上游服务器配置"
   type = map(object({
     servers = list(object({
-      address    = string
-      port       = number
-      max_fails  = optional(number, 3)
+      address      = string
+      port         = number
+      max_fails    = optional(number, 3)
       fail_timeout = optional(string, "30s")
-      weight     = optional(number, 1)
-      backup     = optional(bool, false)
+      weight       = optional(number, 1)
+      backup       = optional(bool, false)
     }))
-    keepalive = optional(number, 32)
+    keepalive         = optional(number, 32)
     keepalive_timeout = optional(string, "60s")
   }))
   default = {}
@@ -69,7 +69,7 @@ variable "upstreams" {
     condition = alltrue([
       for name, upstream in var.upstreams : alltrue([
         for server in upstream.servers :
-          server.port > 0 && server.port <= 65535
+        server.port > 0 && server.port <= 65535
       ])
     ])
     error_message = "所有上游服务器端口必须在1-65535之间"
@@ -79,7 +79,7 @@ variable "upstreams" {
     condition = alltrue([
       for name, upstream in var.upstreams : alltrue([
         for server in upstream.servers :
-          server.max_fails >= 0 && server.max_fails <= 100
+        server.max_fails >= 0 && server.max_fails <= 100
       ])
     ])
     error_message = "max_fails必须在0-100之间"
@@ -89,17 +89,17 @@ variable "upstreams" {
 variable "services" {
   description = "服务配置"
   type = map(object({
-    upstream = string  # 对应的upstream名称
+    upstream = string # 对应的upstream名称
     domains = list(object({
-      domain        = string
-      http_enabled  = optional(bool, true)
-      https_enabled = optional(bool, false)
+      domain              = string
+      http_enabled        = optional(bool, true)
+      https_enabled       = optional(bool, false)
       ssl_certificate     = optional(string, "")
       ssl_certificate_key = optional(string, "")
     }))
     locations = optional(list(object({
-      path         = string
-      proxy_pass   = optional(string, "")  # 如果为空，则使用upstream
+      path          = string
+      proxy_pass    = optional(string, "") # 如果为空，则使用upstream
       custom_config = optional(string, "")
     })), [])
 
@@ -121,7 +121,7 @@ variable "services" {
   validation {
     condition = alltrue([
       for name, service in var.services :
-        contains(keys(var.upstreams), service.upstream) || service.upstream == ""
+      contains(keys(var.upstreams), service.upstream) || service.upstream == ""
     ])
     error_message = "服务引用的upstream必须在upstreams变量中定义"
   }
@@ -130,11 +130,11 @@ variable "services" {
 variable "ssl_common_config" {
   description = "通用SSL配置"
   type = object({
-    protocols           = optional(string, "TLSv1.2 TLSv1.3")
-    ciphers            = optional(string, "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
+    protocols             = optional(string, "TLSv1.2 TLSv1.3")
+    ciphers               = optional(string, "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
     prefer_server_ciphers = optional(bool, true)
-    session_cache      = optional(string, "shared:SSL:10m")
-    session_timeout    = optional(string, "10m")
+    session_cache         = optional(string, "shared:SSL:10m")
+    session_timeout       = optional(string, "10m")
   })
   default = {}
 }
