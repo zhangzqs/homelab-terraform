@@ -16,8 +16,3 @@ output "config_content" {
   description = "Mihomo配置文件内容（已验证 YAML 格式）"
   value       = local.config_content
 }
-
-output "config_parsed" {
-  description = "解析后的配置对象（用于验证）"
-  value       = local.config_parsed
-}

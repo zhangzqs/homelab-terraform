@@ -12,6 +12,7 @@ variable "ubuntu_24_04_datastore_id" {
 
 
 resource "proxmox_virtual_environment_file" "ubuntu_24_04" {
+  count        = var.ubuntu_24_04_enabled ? 1 : 0
   node_name    = var.pve_node_name
   content_type = "vztmpl" // LXC容器模板
   datastore_id = var.ubuntu_24_04_datastore_id

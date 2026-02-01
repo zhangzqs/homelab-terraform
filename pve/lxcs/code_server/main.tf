@@ -26,6 +26,8 @@ resource "proxmox_virtual_environment_container" "code_server_container" {
     ]
   }
 
+  tags = ["terraform"]
+
   description = "Code Server - VS Code in Browser"
 
   node_name     = var.pve_node_name

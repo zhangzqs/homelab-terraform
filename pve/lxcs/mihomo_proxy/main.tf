@@ -19,6 +19,8 @@ resource "proxmox_virtual_environment_container" "mihomo_proxy_container" {
     ]
   }
 
+  tags = ["terraform"]
+
   description = "Mihomo 代理"
 
   node_name     = var.pve_node_name
