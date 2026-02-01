@@ -38,7 +38,7 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Update code statistics [skip ci]"
-            git fetch origin main
-            git rebase origin/main || { echo "Rebase failed, skipping push"; exit 0; }
+            git fetch origin master
+            git rebase origin/master || { echo "Rebase failed, skipping push"; exit 0; }
             git push
           fi
