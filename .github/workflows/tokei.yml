@@ -1,7 +1,10 @@
-name: Tokei Code Statistics
+name: Terraform Checks and Code Statistics
 
 on:
   push:
+    branches:
+      - master
+  pull_request:
     branches:
       - master
   workflow_dispatch:
@@ -10,13 +13,62 @@ permissions:
   contents: write
 
 jobs:
-  tokei:
+  terraform:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.12"
+
+      - name: Format Terraform files
+        run: terraform fmt -recursive
+
+      - name: Commit formatting changes
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No formatting changes to commit"
+          else
+            git commit -m "Auto-format Terraform files [skip ci]"
+            git fetch origin master
+            git rebase origin/master || { echo "Rebase failed, skipping push"; exit 0; }
+            git push
+          fi
+
+      - name: Terraform Init and Validate
+        run: |
+          set -e
+          # Find all directories containing .tf files
+          while IFS= read -r dir; do
+            echo "=== Initializing and validating: $dir ==="
+            pushd "$dir" > /dev/null
+            terraform init -backend=false
+            terraform validate
+            popd > /dev/null
+          done < <(find . -name "*.tf" -type f -exec dirname {} \; | sort -u)
+
+  tokei:
+    runs-on: ubuntu-latest
+    needs: terraform
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Pull latest changes
+        run: git pull origin master
 
       - name: Install tokei
         run: |
