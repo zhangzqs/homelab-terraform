@@ -1,0 +1,6 @@
+# Terraform 临时文件
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+*.tfplan
