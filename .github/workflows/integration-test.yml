@@ -25,9 +25,6 @@ on:
         required: false
         default: true
         type: boolean
-  # schedule:
-  #   # Run weekly on Sunday at 00:00 UTC
-  #   - cron: '0 0 * * 0'
 
 permissions:
   contents: read
@@ -104,6 +101,7 @@ jobs:
         run: |
           # Create answer file for Proxmox VE auto-installer (PVE 8.1+)
           # Reference: https://pve.proxmox.com/wiki/Automated_Installation
+          # Note: Password is written to file for auto-installation. This is a test environment only.
           cat > answer.toml << EOF
           [global]
           keyboard = "en-us"
@@ -121,8 +119,7 @@ jobs:
           disk_list = ["vda"]
           EOF
           
-          echo "=== Answer file content ==="
-          cat answer.toml
+          echo "Answer file created (password redacted in logs)"
 
       - name: Prepare auto-installer ISO
         run: |
@@ -195,7 +192,7 @@ jobs:
               "https://localhost:8006/api2/json/version" 2>/dev/null | grep -q "version"
           }
           
-          MAX_WAIT=2700  # 45 minutes
+          MAX_WAIT=2700  # 45 minutes (45 * 60 seconds)
           ELAPSED=0
           INTERVAL=60
           LAST_LOG_LINE=0
@@ -297,15 +294,6 @@ jobs:
         with:
           terraform_version: "1.12"
 
-      - name: Create test tfvars
-        run: |
-          cat > all_in_one/terraform.tfvars << EOF
-          pve_endpoint = "https://localhost:8006"
-          pve_password = "${{ env.PVE_PASSWORD }}"
-          mihomo_proxy_vars = {}
-          EOF
-          echo "Created terraform.tfvars for testing"
-
       - name: Terraform Init
         working-directory: all_in_one
         run: |
@@ -321,6 +309,10 @@ jobs:
       - name: Terraform Plan
         working-directory: all_in_one
         continue-on-error: true
+        env:
+          # Use TF_VAR_ environment variables to avoid storing credentials in files
+          TF_VAR_pve_endpoint: "https://localhost:8006"
+          TF_VAR_pve_password: ${{ env.PVE_PASSWORD }}
         run: |
           echo "Running Terraform plan..."
           terraform plan -input=false -out=tfplan 2>&1 | tee plan_output.txt
@@ -337,6 +329,9 @@ jobs:
         if: ${{ inputs.skip_terraform_apply != true }}
         working-directory: all_in_one
         continue-on-error: true
+        env:
+          TF_VAR_pve_endpoint: "https://localhost:8006"
+          TF_VAR_pve_password: ${{ env.PVE_PASSWORD }}
         run: |
           echo "Applying Terraform configuration..."
           echo "WARNING: This will create resources in the test PVE instance"
