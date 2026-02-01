@@ -19,3 +19,14 @@ module "pve_vm_k3s_master" {
     https_proxy = local.mihomo_http_proxy_address
   }
 }
+
+output "pve_vm_k3s_master_ipv4_address" {
+  value       = local.pve_ipv4_address_vm_k3s_master
+  description = "K3s Master VM 的 IPv4 地址"
+}
+
+output "pve_vm_k3s_master_password" {
+  value       = module.pve_vm_k3s_master.vm_password
+  description = "K3s Master VM 的默认用户密码"
+  sensitive   = true
+}
