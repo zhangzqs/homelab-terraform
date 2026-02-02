@@ -47,3 +47,11 @@ variable "network_gateway" {
     error_message = "网关IP地址格式不正确，必须是有效的IPv4地址"
   }
 }
+
+# Tailscale配置变量
+variable "tailscale_auth_key" {
+  description = "Tailscale认证密钥(authkey)，从Tailscale管理后台生成"
+  type        = string
+  sensitive   = true
+  default     = "<YOUR_TAILSCALE_AUTH_KEY>"
+}
