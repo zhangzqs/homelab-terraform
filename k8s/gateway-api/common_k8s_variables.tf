@@ -9,11 +9,11 @@ variable "k8s_cluster_ca_certificate" {
 }
 
 variable "k8s_client_key" {
-  description = "Kubernetes 客户端密钥内容, users.user.client-certificate-data 字段的值"
+  description = "Kubernetes 客户端密钥内容, users.user.client-key-data 字段的值"
   type        = string
 }
 
 variable "k8s_client_certificate" {
-  description = "Kubernetes 客户端证书内容, users.user.client-key-data 字段的值"
+  description = "Kubernetes 客户端证书内容, users.user.client-certificate-data 字段的值"
   type        = string
 }
