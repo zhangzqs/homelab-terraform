@@ -14,6 +14,7 @@ locals {
   pve_vm_id_lxc_code_server    = 201
   pve_vm_id_vm_k3s_master      = 202
   pve_vm_id_lxc_storage_server = 203
+  pve_vm_id_lxc_coredns        = 204
 }
 
 // 这个 locals 主要用于分配所有vm和lxc的IPv4地址，避免冲突
@@ -23,4 +24,5 @@ locals {
   pve_ipv4_address_lxc_code_server  = "192.168.242.201"
   pve_ipv4_address_vm_k3s_master    = "192.168.242.202"
   pve_ipv4_address_lxc_nfs_server   = "192.168.242.203"
+  pve_ipv4_address_lxc_coredns      = "192.168.242.204"
 }
