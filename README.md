@@ -8,6 +8,8 @@
 - **☸️ K3s 集群**：自动创建并配置 K3s 主节点，开箱即用的轻量级 Kubernetes
 - **💻 Code Server**：基于 Web 的 VS Code 开发环境，随时随地编码
 - **🌐 Mihomo 代理**：内置代理服务，加速容器镜像下载和网络访问
+- **🗄️ 存储服务器**：支持 NFS 和 SMB 协议的存储服务
+- **🔍 CoreDNS**：高性能 DNS 服务器，支持自定义 hosts 和缓存
 - **📦 模块化设计**：可重用的 Terraform 模块，灵活组合使用
 - **🔐 自动化安全配置**：自动生成 SSH 密钥和密码，安全管理
 
@@ -23,10 +25,13 @@
 .
 ├── all_in_one/           # 一键部署入口（推荐使用）
 │   ├── code_server.tf    # Code Server LXC 容器配置
+│   ├── coredns.tf        # CoreDNS LXC 容器配置
 │   ├── k3s.tf            # K3s 主节点 VM 配置
+│   ├── k8s.tf            # Kubernetes 应用配置
 │   ├── locals.tf         # 公共配置（IP 地址、VM ID 等）
 │   ├── mihomo.tf         # Mihomo 代理 LXC 容器配置
 │   ├── pve_host.tf       # PVE 主机基础配置
+│   ├── storage_server.tf # 存储服务器 LXC 容器配置
 │   └── variables.tf      # 输入变量定义
 ├── pve/                  # Proxmox VE 模块
 │   ├── common/           # PVE Provider 公共配置
@@ -34,14 +39,21 @@
 │   ├── lxc_templates/    # LXC 容器模板下载
 │   ├── lxcs/             # LXC 容器模块
 │   │   ├── code_server/  # Code Server 容器
-│   │   └── mihomo_proxy/ # Mihomo 代理容器
+│   │   ├── coredns/      # CoreDNS DNS 服务容器
+│   │   ├── mihomo_proxy/ # Mihomo 代理容器
+│   │   └── storage_server/ # 存储服务器容器（NFS/SMB）
 │   ├── vm_cloud_images/  # VM Cloud Image 下载
 │   └── vms/              # 虚拟机模块
 │       └── k3s_master/   # K3s 主节点虚拟机
 ├── k8s/                  # Kubernetes 相关模块
-│   └── common/           # K8s Provider 公共配置
+│   ├── all_in_one/       # K8s 一键部署入口
+│   ├── common/           # K8s Provider 公共配置
+│   ├── ingress-nginx/    # Ingress Nginx 控制器
+│   ├── plantuml/         # PlantUML 服务
+│   └── speedtest/        # Speedtest 测速服务
 └── utils/                # 工具模块
-    └── mihomo_config_generator/  # Mihomo 配置生成器
+    ├── mihomo_config_generator/  # Mihomo 配置生成器
+    └── nginx_config_generator/   # Nginx 配置生成器
 ```
 
 ## 🚀 快速开始
@@ -109,6 +121,8 @@ terraform output
 | Mihomo Proxy | LXC | 200 | 192.168.242.200 |
 | Code Server | LXC | 201 | 192.168.242.201 |
 | K3s Master | VM | 202 | 192.168.242.202 |
+| Storage Server | LXC | 203 | 192.168.242.203 |
+| CoreDNS | LXC | 204 | 192.168.242.204 |
 
 > **注意**：IP 地址和 VM ID 可以在 `all_in_one/locals.tf` 中自定义修改。
 
