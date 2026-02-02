@@ -2,9 +2,6 @@ module "pve_lxc_instance_tailscale" {
   source = "../pve/lxcs/tailscale"
 
   pve_node_name = local.pve_node_name
-  pve_endpoint  = var.pve_endpoint
-  pve_username  = local.pve_username
-  pve_password  = var.pve_password
 
   hostname                 = "tailscale"
   vm_id                    = local.pve_vm_id_lxc_tailscale
@@ -32,6 +29,10 @@ module "pve_lxc_instance_tailscale" {
   # Prometheus监控
   metrics_enabled = true
   metrics_port    = 9001
+
+  providers = {
+    proxmox = proxmox
+  }
 }
 
 output "pve_lxc_tailscale_ipv4_address" {

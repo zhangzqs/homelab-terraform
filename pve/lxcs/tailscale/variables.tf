@@ -1,3 +1,9 @@
+variable "pve_node_name" {
+  description = "Proxmox 节点名称"
+  type        = string
+  default     = "pve"
+}
+
 # LXC容器基础配置
 variable "hostname" {
   description = "LXC容器主机名"

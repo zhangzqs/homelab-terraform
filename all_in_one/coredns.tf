@@ -2,10 +2,6 @@ module "pve_lxc_instance_coredns" {
   source = "../pve/lxcs/coredns"
 
   pve_node_name = local.pve_node_name
-  pve_endpoint  = var.pve_endpoint
-  pve_username  = local.pve_username
-  pve_password  = var.pve_password
-
   hostname                 = "coredns"
   vm_id                    = local.pve_vm_id_lxc_coredns
   ubuntu_template_file_id  = module.pve_lxc_templates.ubuntu_24_04_id
@@ -49,6 +45,10 @@ module "pve_lxc_instance_coredns" {
       ip   = "192.168.145.10",
     },
   ]
+
+  providers = {
+    proxmox = proxmox
+  }
 }
 
 output "pve_lxc_coredns_ipv4_address" {

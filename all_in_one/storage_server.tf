@@ -2,9 +2,6 @@ module "pve_lxc_instance_storage_server" {
   source = "../pve/lxcs/storage_server"
 
   pve_node_name = local.pve_node_name
-  pve_endpoint  = var.pve_endpoint
-  pve_username  = local.pve_username
-  pve_password  = var.pve_password
 
   hostname                 = "storage-server"
   vm_id                    = local.pve_vm_id_lxc_storage_server
@@ -39,6 +36,10 @@ module "pve_lxc_instance_storage_server" {
       read_only   = false
     },
   ]
+
+  providers = {
+    proxmox = proxmox
+  }
 }
 
 output "pve_lxc_storage_server_ipv4_address" {
