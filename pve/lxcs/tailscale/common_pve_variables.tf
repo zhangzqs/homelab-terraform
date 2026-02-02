@@ -1,0 +1,1 @@
+../../lxc_templates/common_pve_variables.tf
