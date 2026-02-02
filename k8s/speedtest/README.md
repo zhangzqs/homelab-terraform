@@ -123,30 +123,47 @@ kubectl port-forward -n speedtest svc/librespeed 8080:80
 
 然后在浏览器中访问 `http://localhost:8080`
 
-### 通过 Ingress 暴露（推荐）
+### 通过 Gateway API HTTPRoute 暴露（推荐）
 
-创建 Ingress 资源以便从外部访问:
+此模块支持使用 Gateway API 的 HTTPRoute 来暴露服务，这是 Kubernetes 新一代的流量路由标准。
+
+启用 HTTPRoute:
+
+```hcl
+module "speedtest" {
+  source = "./k8s/speedtest"
+
+  # ... 其他配置 ...
+
+  speedtest_enable_httproute = true
+  speedtest_httproute_host   = "speedtest.yourdomain.com"
+  gateway_name               = "nginx-gateway"
+  gateway_namespace          = "nginx-gateway"
+}
+```
+
+或者手动创建 HTTPRoute 资源:
 
 ```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
-  name: speedtest-ingress
+  name: speedtest-httproute
   namespace: speedtest
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  parentRefs:
+  - name: nginx-gateway
+    namespace: nginx-gateway
+  hostnames:
+  - speedtest.yourdomain.com
   rules:
-  - host: speedtest.yourdomain.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: librespeed
-            port:
-              number: 80
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: librespeed
+      port: 80
 ```
 
 ## 使用测速服务

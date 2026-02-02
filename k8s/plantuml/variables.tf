@@ -46,14 +46,26 @@ variable "plantuml_memory_limit" {
   default     = "512Mi"
 }
 
-variable "plantuml_ingress_host" {
-  description = "PlantUML Ingress 访问域名"
+variable "plantuml_httproute_host" {
+  description = "PlantUML HTTPRoute 访问域名"
   type        = string
   default     = "plantuml.example.com"
 }
 
-variable "plantuml_enable_ingress" {
-  description = "是否启用 Ingress"
+variable "plantuml_enable_httproute" {
+  description = "是否启用 HTTPRoute (Gateway API)"
   type        = bool
   default     = false
+}
+
+variable "gateway_name" {
+  description = "Gateway 资源名称"
+  type        = string
+  default     = "nginx-gateway"
+}
+
+variable "gateway_namespace" {
+  description = "Gateway 所在命名空间"
+  type        = string
+  default     = "nginx-gateway"
 }

@@ -92,28 +92,47 @@ kubectl port-forward -n plantuml svc/plantuml-server 8080:8080
 
 然后在浏览器中访问 `http://localhost:8080`
 
-### 通过 Ingress 暴露（可选）
+### 通过 Gateway API HTTPRoute 暴露（推荐）
 
-如果需要从集群外部访问，可以创建一个 Ingress 资源:
+此模块支持使用 Gateway API 的 HTTPRoute 来暴露服务，这是 Kubernetes 新一代的流量路由标准。
+
+启用 HTTPRoute:
+
+```hcl
+module "plantuml" {
+  source = "./k8s/plantuml"
+
+  # ... 其他配置 ...
+
+  plantuml_enable_httproute = true
+  plantuml_httproute_host   = "plantuml.yourdomain.com"
+  gateway_name              = "nginx-gateway"
+  gateway_namespace         = "nginx-gateway"
+}
+```
+
+或者手动创建 HTTPRoute 资源:
 
 ```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
-  name: plantuml-ingress
+  name: plantuml-httproute
   namespace: plantuml
 spec:
+  parentRefs:
+  - name: nginx-gateway
+    namespace: nginx-gateway
+  hostnames:
+  - plantuml.yourdomain.com
   rules:
-  - host: plantuml.yourdomain.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: plantuml-server
-            port:
-              number: 8080
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: plantuml-server
+      port: 8080
 ```
 
 ## 测试 PlantUML
