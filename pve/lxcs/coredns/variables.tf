@@ -58,8 +58,8 @@ variable "upstream_dns_servers" {
   description = "上游DNS服务器列表，支持普通DNS、DoH和DoT地址"
   type        = list(string)
   default = [
-    "223.5.5.5",           # 阿里DNS
-    "119.29.29.29",        # 腾讯DNS
+    "223.5.5.5",    # 阿里DNS
+    "119.29.29.29", # 腾讯DNS
   ]
 }
 
