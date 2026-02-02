@@ -17,7 +17,7 @@ StandardError=append:${working_dir}/coredns.log
 # 安全加固
 NoNewPrivileges=true
 ProtectSystem=full
-ProtectHome=true
+ProtectHome=read-only
 PrivateTmp=true
 
 [Install]

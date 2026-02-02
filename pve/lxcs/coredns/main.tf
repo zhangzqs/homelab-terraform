@@ -57,7 +57,7 @@ resource "proxmox_virtual_environment_container" "coredns_container" {
   }
 
   memory {
-    dedicated = 256
+    dedicated = 512
     swap      = 0
   }
 
