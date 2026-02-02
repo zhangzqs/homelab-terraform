@@ -9,6 +9,25 @@ sed -i 's/http:/https:/g' /etc/apt/sources.list
 
 apt-get update && apt-get install -y curl openssh-server htop wget
 
+# 禁用systemd-resolved以释放53端口
+echo "Disabling systemd-resolved to free port 53..."
+systemctl stop systemd-resolved 2>/dev/null || true
+systemctl disable systemd-resolved 2>/dev/null || true
+
+# 删除systemd-resolved创建的resolv.conf符号链接
+rm -f /etc/resolv.conf
+
+# 创建新的resolv.conf使用公共DNS
+cat > /etc/resolv.conf <<EOF
+nameserver 223.5.5.5
+nameserver 119.29.29.29
+EOF
+
+# 防止resolv.conf被修改
+chattr +i /etc/resolv.conf || true
+
+echo "Port 53 is now available for CoreDNS."
+
 # CoreDNS版本
 COREDNS_VERSION="1.12.1"
 

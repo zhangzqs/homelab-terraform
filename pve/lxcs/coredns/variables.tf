@@ -87,11 +87,20 @@ variable "enable_dnssec" {
   default     = false
 }
 
-variable "custom_hosts" {
-  description = "自定义hosts记录列表"
+variable "hosts" {
+  description = "Hosts记录列表（精确匹配）"
   type = list(object({
     ip       = string
     hostname = string
+  }))
+  default = []
+}
+
+variable "wildcard_domains" {
+  description = "泛域名配置列表"
+  type = list(object({
+    zone = string # 域名后缀，如 example.com（不含*）
+    ip   = string
   }))
   default = []
 }

@@ -30,16 +30,34 @@ module "pve_lxc_instance_coredns" {
   cache_prefetch    = 10
   cache_serve_stale = 86400
 
-  # 可选：自定义hosts记录
-  custom_hosts = []
+  # 可选：Hosts记录（精确匹配）
+  hosts = [
+    {
+      hostname = "1.my-custom-host.local"
+      ip       = "192.212.12.12"
+    }
+  ]
+
+  # 可选：泛域名配置（支持*.example.com形式的通配符）
+  wildcard_domains = [
+    {
+      zone = "my-custom-host.local",
+      ip   = "192.168.145.12",
+    },
+    {
+      zone = "example.local",
+      ip   = "192.168.145.10",
+    },
+  ]
 }
 
-output "coredns_dns_address" {
-  value       = module.pve_lxc_instance_coredns.dns_address
-  description = "CoreDNS DNS服务地址"
+output "pve_lxc_coredns_ipv4_address" {
+  value       = module.pve_lxc_instance_coredns.container_ip
+  description = "CoreDNS LXC容器IPv4地址"
 }
 
-output "coredns_metrics_address" {
-  value       = module.pve_lxc_instance_coredns.metrics_address
-  description = "CoreDNS Prometheus metrics地址"
+output "pve_lxc_coredns_password" {
+  value       = module.pve_lxc_instance_coredns.container_password
+  description = "CoreDNS LXC容器用户密码"
+  sensitive   = true
 }

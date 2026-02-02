@@ -78,8 +78,8 @@ resource "null_resource" "setup_container" {
   ]
 
   triggers = {
-    lxc_id    = proxmox_virtual_environment_container.coredns_container.id
     version   = 1
+    lxc_id    = proxmox_virtual_environment_container.coredns_container.id
     file_hash = filesha256("${path.module}/scripts/setup.sh")
   }
 
@@ -120,8 +120,10 @@ locals {
     cache_prefetch       = var.cache_prefetch
     cache_serve_stale    = var.cache_serve_stale
     enable_dnssec        = var.enable_dnssec
-    custom_hosts         = var.custom_hosts
+    hosts                = var.hosts
+    wildcard_domains     = var.wildcard_domains
     upstream_dns_servers = var.upstream_dns_servers
+    working_dir          = var.working_dir
   })
 
   coredns_service_content = templatefile("${path.module}/templates/coredns.service.tpl", {
@@ -136,8 +138,9 @@ resource "null_resource" "setup_systemd_service" {
   ]
 
   triggers = {
-    version      = 1
-    service_hash = sha256(local.coredns_service_content)
+    version            = 1
+    setup_container_id = null_resource.setup_container.id
+    service_hash       = sha256(local.coredns_service_content)
   }
 
   provisioner "file" {
@@ -176,8 +179,9 @@ resource "null_resource" "update_coredns_config" {
   ]
 
   triggers = {
-    version     = 1
-    config_hash = sha256(local.corefile_content)
+    version                  = 1
+    setup_systemd_service_id = null_resource.setup_systemd_service.id
+    config_hash              = sha256(local.corefile_content)
   }
 
   provisioner "file" {
