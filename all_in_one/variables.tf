@@ -53,5 +53,4 @@ variable "tailscale_auth_key" {
   description = "Tailscale认证密钥(authkey)，从Tailscale管理后台生成"
   type        = string
   sensitive   = true
-  default     = "<YOUR_TAILSCALE_AUTH_KEY>"
 }
