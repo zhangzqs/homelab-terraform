@@ -11,9 +11,6 @@ module "pve_lxc_instance_mihomo" {
   source = "../pve/lxcs/mihomo_proxy"
 
   pve_node_name = local.pve_node_name
-  pve_endpoint  = var.pve_endpoint
-  pve_username  = local.pve_username
-  pve_password  = var.pve_password
 
   hostname                 = "mihomo-proxy"
   vm_id                    = local.pve_vm_id_lxc_mihomo_proxy
@@ -24,6 +21,10 @@ module "pve_lxc_instance_mihomo" {
   ipv4_gateway             = local.pve_default_ipv4_gateway
   working_dir              = "/root/mihomo"
   mihomo_config_content    = module.mihomo_proxy_config.config_content
+
+  providers = {
+    proxmox = proxmox
+  }
 }
 
 locals {

@@ -2,9 +2,6 @@ module "pve_lxc_instance_code_server" {
   source = "../pve/lxcs/code_server"
 
   pve_node_name = local.pve_node_name
-  pve_endpoint  = var.pve_endpoint
-  pve_username  = local.pve_username
-  pve_password  = var.pve_password
 
   vm_id                    = local.pve_vm_id_lxc_code_server
   network_interface_bridge = local.pve_default_network_bridge
@@ -19,5 +16,9 @@ module "pve_lxc_instance_code_server" {
   install_proxy = {
     http_proxy  = local.mihomo_http_proxy_address
     https_proxy = local.mihomo_http_proxy_address
+  }
+
+  providers = {
+    proxmox = proxmox
   }
 }
