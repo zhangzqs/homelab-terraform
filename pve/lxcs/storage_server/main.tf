@@ -12,12 +12,22 @@ resource "terraform_data" "container_replacer" {
   triggers_replace = 1 // 当这个字段发生改变，会触发依赖它的资源重新创建
 }
 
+resource "null_resource" "storage_server_container_protect" {
+  count = var.prevent_container_destroy ? 1 : 0
+
+  triggers = {
+    storage_server_container_id = proxmox_virtual_environment_container.storage_server_container.id
+  }
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 resource "proxmox_virtual_environment_container" "storage_server_container" {
   lifecycle {
     replace_triggered_by = [
       terraform_data.container_replacer
     ]
-    prevent_destroy = true # 这是个有状态容器，禁止在terraform中销毁
   }
 
   tags = ["terraform"]

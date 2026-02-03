@@ -146,3 +146,9 @@ variable "host_mount_points" {
     error_message = "宿主机路径和容器路径必须是绝对路径（以 / 开头）"
   }
 }
+
+variable "prevent_container_destroy" {
+  description = "是否禁止通过 Terraform 销毁该容器"
+  type        = bool
+  default     = true
+}
