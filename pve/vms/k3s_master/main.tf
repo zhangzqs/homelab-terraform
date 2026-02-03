@@ -129,22 +129,25 @@ resource "null_resource" "install_k3s_master" {
   }
 }
 
+locals {
+  configure_k3s_proxy_content = templatefile("${path.module}/scripts/configure_k3s_proxy.sh.tpl", {
+    has_proxy   = var.containerd_proxy != null
+    http_proxy  = var.containerd_proxy != null ? var.containerd_proxy.http_proxy : ""
+    https_proxy = var.containerd_proxy != null ? var.containerd_proxy.https_proxy : ""
+    no_proxy    = var.containerd_proxy != null ? var.containerd_proxy.no_proxy : ""
+  })
+}
 resource "null_resource" "configure_k3s_proxy" {
   depends_on = [null_resource.install_k3s_master]
 
   triggers = {
     version      = 1
     vm_res_id    = proxmox_virtual_environment_vm.k3s_master.id
-    proxy_config = sha256(jsonencode(var.containerd_proxy))
+    proxy_config = sha256(local.configure_k3s_proxy_content)
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/scripts/configure_k3s_proxy.sh.tpl", {
-      has_proxy   = var.containerd_proxy != null
-      http_proxy  = var.containerd_proxy != null ? var.containerd_proxy.http_proxy : ""
-      https_proxy = var.containerd_proxy != null ? var.containerd_proxy.https_proxy : ""
-      no_proxy    = var.containerd_proxy != null ? var.containerd_proxy.no_proxy : ""
-    })
+    content     = local.configure_k3s_proxy_content
     destination = "/tmp/configure_k3s_proxy.sh"
 
     connection {

@@ -25,3 +25,5 @@ sleep 5
 
 # 检查 k3s 状态
 systemctl status k3s --no-pager || true
+
+kubectl apply -f "https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml"

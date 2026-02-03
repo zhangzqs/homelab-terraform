@@ -1,4 +1,3 @@
-
 module "gateway_api" {
   source = "../gateway-api"
 

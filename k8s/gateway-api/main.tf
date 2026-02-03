@@ -1,5 +1,4 @@
 # 部署 NGINX Gateway Fabric
-# Helm chart 会自动安装所需的 Gateway API CRDs
 resource "helm_release" "nginx_gateway_fabric" {
   name             = "nginx-gateway-fabric"
   repository       = "oci://ghcr.io/nginx/charts"

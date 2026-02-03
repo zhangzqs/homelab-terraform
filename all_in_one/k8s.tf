@@ -1,3 +1,6 @@
+// 这个模块能正常工作需要提前依赖
+// terraform apply -target=module.pve_vm_k3s_master
+// 这个资源的创建
 module "k8s" {
   source = "../k8s/all_in_one"
 
