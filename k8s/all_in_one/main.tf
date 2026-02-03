@@ -1,6 +1,6 @@
 
-module "ingress_nginx" {
-  source = "../ingress-nginx"
+module "gateway_api" {
+  source = "../gateway-api"
 
   providers = {
     helm = helm
@@ -10,8 +10,10 @@ module "ingress_nginx" {
 module "speedtest" {
   source = "../speedtest"
 
-  speedtest_enable_ingress = true
-
+  speedtest_enable_httproute  = true
+  gateway_name                = module.gateway_api.gateway_name
+  gateway_namespace           = module.gateway_api.gateway_api_namespace
+    
   providers = {
     kubernetes = kubernetes
   }
@@ -19,6 +21,10 @@ module "speedtest" {
 
 module "plantuml" {
   source = "../plantuml"
+
+  plantuml_enable_httproute   = true
+  gateway_name                = module.gateway_api.gateway_name
+  gateway_namespace           = module.gateway_api.gateway_api_namespace
 
   providers = {
     kubernetes = kubernetes

@@ -71,14 +71,26 @@ variable "speedtest_memory_limit" {
   default     = "256Mi"
 }
 
-variable "speedtest_ingress_host" {
-  description = "Speedtest Ingress 访问域名"
+variable "speedtest_httproute_host" {
+  description = "Speedtest HTTPRoute 访问域名"
   type        = string
   default     = "speedtest.example.com"
 }
 
-variable "speedtest_enable_ingress" {
-  description = "是否启用 Ingress"
+variable "speedtest_enable_httproute" {
+  description = "是否启用 HTTPRoute (Gateway API)"
   type        = bool
   default     = false
+}
+
+variable "gateway_name" {
+  description = "Gateway 资源名称"
+  type        = string
+  default     = "nginx-gateway"
+}
+
+variable "gateway_namespace" {
+  description = "Gateway 所在命名空间"
+  type        = string
+  default     = "nginx-gateway"
 }
