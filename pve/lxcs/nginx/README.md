@@ -2,6 +2,10 @@
 
 用于在 Proxmox 上创建和配置 Nginx LXC 容器的 Terraform 模块。
 
+## 架构图
+
+![Terraform 架构图](../../../all_in_one/graph.svg)
+
 ## 功能特性
 
 - 🚀 **自动化部署**：一键创建和配置 Nginx LXC 容器
