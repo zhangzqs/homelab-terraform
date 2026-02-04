@@ -1,4 +1,4 @@
-output "container_ip" {
+output "container_ipv4_address" {
   value       = var.ipv4_address
   description = "容器IP地址"
 }
@@ -18,6 +18,11 @@ output "code_server_password" {
   value       = local.code_server_password
   description = "Code Server访问密码"
   sensitive   = true
+}
+
+output "code_server_port" {
+  value       = var.code_server_port
+  description = "code-server 监听端口"
 }
 
 output "ssh_private_key" {

@@ -6,8 +6,8 @@ Wants=network-online.target
 [Service]
 Type=forking
 PIDFile=/run/nginx.pid
-ExecStartPre=/usr/sbin/nginx -t -q -c /root/nginx/config/nginx.conf
-ExecStart=/usr/sbin/nginx -c /root/nginx/config/nginx.conf
+ExecStartPre=/usr/sbin/nginx -t -q -c ${working_dir}/nginx.conf
+ExecStart=/usr/sbin/nginx -c ${working_dir}/nginx.conf
 ExecReload=/bin/sh -c "/bin/kill -s HUP $(/bin/cat /run/nginx.pid)"
 ExecStop=/bin/sh -c "/bin/kill -s TERM $(/bin/cat /run/nginx.pid)"
 TimeoutStopSec=5

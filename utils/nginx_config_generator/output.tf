@@ -7,6 +7,7 @@ locals {
     vts_status_port    = var.vts_status_port
     enable_gzip        = var.enable_gzip
     log_format         = var.log_format
+    working_dir        = var.working_dir
     access_log_path    = var.access_log_path
     error_log_path     = var.error_log_path
     error_log_level    = var.error_log_level

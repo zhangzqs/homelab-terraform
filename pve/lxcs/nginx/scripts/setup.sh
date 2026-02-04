@@ -16,14 +16,4 @@ fi
 systemctl stop nginx || true
 systemctl disable nginx || true
 
-# 创建自定义配置目录结构
-mkdir -p /root/nginx/config/conf.d
-mkdir -p /root/nginx/logs
-
-# 设置目录权限
-chmod 755 /root/nginx
-chmod 755 /root/nginx/config
-chmod 755 /root/nginx/config/conf.d
-chmod 755 /root/nginx/logs
-
-echo "Setup completed. Systemd service will be configured separately."
+echo "Setup completed. Directory structure and systemd service will be configured separately."

@@ -18,7 +18,7 @@ variable "worker_connections" {
 variable "enable_vts" {
   description = "是否启用VTS状态监控模块"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "vts_status_port" {
@@ -49,6 +49,12 @@ variable "log_format" {
   }
 }
 
+variable "working_dir" {
+  description = "Nginx工作目录"
+  type        = string
+  default     = "/root/nginx"
+}
+
 variable "access_log_path" {
   description = "访问日志文件路径"
   type        = string
@@ -77,7 +83,6 @@ variable "shared_upstreams" {
   type = map(object({
     servers = list(object({
       address      = string
-      port         = number
       max_fails    = optional(number, 3)
       fail_timeout = optional(string, "30s")
       weight       = optional(number, 1)
@@ -92,10 +97,10 @@ variable "shared_upstreams" {
     condition = alltrue([
       for name, upstream in var.shared_upstreams : alltrue([
         for server in upstream.servers :
-        server.port > 0 && server.port <= 65535
+        !startswith(server.address, "http://") && !startswith(server.address, "https://")
       ])
     ])
-    error_message = "所有上游服务器端口必须在1-65535之间"
+    error_message = "upstream server的address不能以http://或https://开头，应直接使用IP:端口或域名:端口格式，例如：192.168.1.100:8080"
   }
 
   validation {
@@ -117,7 +122,6 @@ variable "services" {
     upstream_inline = optional(object({ # 内联upstream配置
       servers = list(object({
         address      = string
-        port         = number
         max_fails    = optional(number, 3)
         fail_timeout = optional(string, "30s")
         weight       = optional(number, 1)
@@ -173,10 +177,10 @@ variable "services" {
       for name, service in var.services :
       service.upstream_inline == null || alltrue([
         for server in service.upstream_inline.servers :
-        server.port > 0 && server.port <= 65535
+        !startswith(server.address, "http://") && !startswith(server.address, "https://")
       ])
     ])
-    error_message = "内联upstream的所有服务器端口必须在1-65535之间"
+    error_message = "内联upstream server的address不能以http://或https://开头，应直接使用IP:端口或域名:端口格式，例如：192.168.1.100:8080"
   }
 
   validation {

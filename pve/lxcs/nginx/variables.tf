@@ -42,6 +42,12 @@ variable "ipv4_gateway" {
   type        = string
 }
 
+variable "working_dir" {
+  description = "Nginx工作目录"
+  type        = string
+  default     = "/root/nginx"
+}
+
 variable "nginx_configs" {
   description = "从nginx_config_generator模块输出的配置文件映射"
   type        = map(string)

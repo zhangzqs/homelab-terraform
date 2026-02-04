@@ -102,7 +102,7 @@ http {
         ''      close;
     }
 
-    proxy_cache_path /var/cache/nginx/proxy
+    proxy_cache_path ${working_dir}/cache/proxy
         levels=1:2
         keys_zone=proxy_cache:100m
         max_size=10G
@@ -110,8 +110,8 @@ http {
         use_temp_path=off;
 
     # 上游服务器配置
-    include /etc/nginx/conf.d/upstream.conf;
+    include ${working_dir}/conf.d/upstream.conf;
 
     # 服务配置
-    include /etc/nginx/conf.d/servers.conf;
+    include ${working_dir}/conf.d/servers.conf;
 }

@@ -112,6 +112,12 @@ resource "null_resource" "setup_nginx" {
 }
 
 # 配置systemd服务
+locals {
+  nginx_service_content = templatefile("${path.module}/templates/nginx.service.tpl", {
+    working_dir = var.working_dir
+  })
+}
+
 resource "null_resource" "setup_systemd_service" {
   depends_on = [
     null_resource.setup_nginx
@@ -119,11 +125,11 @@ resource "null_resource" "setup_systemd_service" {
 
   triggers = {
     version      = 1
-    service_hash = filesha256("${path.module}/templates/nginx.service.tpl")
+    service_hash = sha256(local.nginx_service_content)
   }
 
   provisioner "file" {
-    source      = "${path.module}/templates/nginx.service.tpl"
+    content     = local.nginx_service_content
     destination = "/etc/systemd/system/nginx.service"
 
     connection {
@@ -145,6 +151,13 @@ resource "null_resource" "setup_systemd_service" {
     }
 
     inline = [
+      "mkdir -p ${var.working_dir}/conf.d",
+      "mkdir -p ${var.working_dir}/logs",
+      "mkdir -p ${var.working_dir}/cache/proxy",
+      "chmod 755 ${var.working_dir}",
+      "chmod 755 ${var.working_dir}/conf.d",
+      "chmod 755 ${var.working_dir}/logs",
+      "chmod 755 ${var.working_dir}/cache",
       "systemctl daemon-reload",
       "systemctl enable nginx.service",
     ]
@@ -153,8 +166,35 @@ resource "null_resource" "setup_systemd_service" {
 
 # 部署Nginx配置文件
 resource "null_resource" "deploy_nginx_configs" {
+  for_each = var.nginx_configs
+
   depends_on = [
     null_resource.setup_systemd_service
+  ]
+
+  triggers = {
+    version     = 1
+    config_hash = sha256(each.value)
+  }
+
+  provisioner "file" {
+    content     = each.value
+    destination = "${var.working_dir}/${each.key}"
+
+    connection {
+      type        = "ssh"
+      user        = "root"
+      host        = var.ipv4_address
+      private_key = tls_private_key.container_key.private_key_pem
+      timeout     = "2m"
+    }
+  }
+}
+
+# 测试配置并重启Nginx服务
+resource "null_resource" "restart_nginx" {
+  depends_on = [
+    null_resource.deploy_nginx_configs
   ]
 
   triggers = {
@@ -162,49 +202,6 @@ resource "null_resource" "deploy_nginx_configs" {
     config_hash = sha256(jsonencode(var.nginx_configs))
   }
 
-  # 上传nginx.conf
-  provisioner "file" {
-    content     = var.nginx_configs["nginx.conf"]
-    destination = "/root/nginx/config/nginx.conf"
-
-    connection {
-      type        = "ssh"
-      user        = "root"
-      host        = var.ipv4_address
-      private_key = tls_private_key.container_key.private_key_pem
-      timeout     = "2m"
-    }
-  }
-
-  # 上传upstream.conf
-  provisioner "file" {
-    content     = var.nginx_configs["conf.d/upstream.conf"]
-    destination = "/root/nginx/config/conf.d/upstream.conf"
-
-    connection {
-      type        = "ssh"
-      user        = "root"
-      host        = var.ipv4_address
-      private_key = tls_private_key.container_key.private_key_pem
-      timeout     = "2m"
-    }
-  }
-
-  # 上传servers.conf
-  provisioner "file" {
-    content     = var.nginx_configs["conf.d/servers.conf"]
-    destination = "/root/nginx/config/conf.d/servers.conf"
-
-    connection {
-      type        = "ssh"
-      user        = "root"
-      host        = var.ipv4_address
-      private_key = tls_private_key.container_key.private_key_pem
-      timeout     = "2m"
-    }
-  }
-
-  # 测试配置并重启服务
   provisioner "remote-exec" {
     connection {
       type        = "ssh"
@@ -215,7 +212,7 @@ resource "null_resource" "deploy_nginx_configs" {
     }
 
     inline = [
-      "nginx -t -c /root/nginx/config/nginx.conf",
+      "nginx -t -c ${var.working_dir}/nginx.conf",
       "systemctl restart nginx.service",
       "sleep 2",
       "systemctl status nginx.service --no-pager || true",
