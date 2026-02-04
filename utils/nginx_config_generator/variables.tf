@@ -52,13 +52,13 @@ variable "log_format" {
 variable "access_log_path" {
   description = "访问日志文件路径"
   type        = string
-  default     = "/var/log/nginx/access.log"
+  default     = "/root/nginx/logs/access.log"
 }
 
 variable "error_log_path" {
   description = "错误日志文件路径"
   type        = string
-  default     = "/var/log/nginx/error.log"
+  default     = "/root/nginx/logs/error.log"
 }
 
 variable "error_log_level" {
