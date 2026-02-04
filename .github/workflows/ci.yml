@@ -118,3 +118,47 @@ jobs:
             git rebase origin/master || { echo "Rebase failed, skipping push"; exit 0; }
             git push
           fi
+
+  terraform-graph:
+    runs-on: ubuntu-latest
+    needs: tokei
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Pull latest changes
+        run: git pull origin master
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.12"
+
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Generate Terraform graph
+        working-directory: all_in_one
+        run: |
+          set -e
+          terraform init -backend=false
+          terraform graph | dot -Tsvg > graph.svg
+          echo "Terraform graph generated successfully"
+
+      - name: Commit and push graph
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add all_in_one/graph.svg
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: update terraform graph [skip ci]"
+            git fetch origin master
+            git rebase origin/master || { echo "Rebase failed, skipping push"; exit 0; }
+            git push
+          fi
