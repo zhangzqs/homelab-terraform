@@ -10,17 +10,33 @@ locals {
     custom_global_config = var.custom_global_config
   })
 
+  # 从services中提取内联的upstream配置，并为其生成唯一名称
+  inline_upstreams = {
+    for service_name, service in var.services :
+    "${service_name}_upstream" => service.upstream_inline
+    if service.upstream_inline != null
+  }
+
+  # 合并共享upstreams和内联upstreams
+  all_upstreams = merge(var.shared_upstreams, local.inline_upstreams)
+
+  # 为每个服务确定其实际使用的upstream名称
+  service_upstream_map = {
+    for service_name, service in var.services :
+    service_name => service.upstream_ref != "" ? service.upstream_ref : "${service_name}_upstream"
+  }
+
   # 生成upstream配置文件
   upstream_conf_content = templatefile("${path.module}/upstream.conf.tpl", {
-    upstreams = var.upstreams
+    upstreams = local.all_upstreams
   })
 
-  # 为每个服务生成独立的server配置文件
-  server_configs = {
+  # 为每个服务生成独立的server配置内容
+  server_config_contents = {
     for service_name, service in var.services :
     service_name => templatefile("${path.module}/server.conf.tpl", {
       service_name = service_name
-      upstream     = service.upstream
+      upstream     = local.service_upstream_map[service_name]
       domains      = service.domains
       locations    = service.locations
       proxy_config = merge({
@@ -39,6 +55,12 @@ locals {
       ssl_session_timeout       = var.ssl_common_config.session_timeout != null ? var.ssl_common_config.session_timeout : "10m"
     })
   }
+
+  # 合并所有server配置为单个文件
+  servers_conf_content = join("\n", [
+    for service_name in sort(keys(local.server_config_contents)) :
+    local.server_config_contents[service_name]
+  ])
 }
 
 output "nginx_conf" {
@@ -51,21 +73,21 @@ output "upstream_conf" {
   value       = local.upstream_conf_content
 }
 
+output "servers_conf" {
+  description = "所有服务的server配置合并后的内容（单个文件）"
+  value       = local.servers_conf_content
+}
+
 output "server_configs" {
-  description = "各服务的server配置文件内容，key为服务名"
-  value       = local.server_configs
+  description = "各服务的server配置文件内容（按服务名分组，用于需要分离文件的场景）"
+  value       = local.server_config_contents
 }
 
 output "all_configs" {
   description = "所有配置文件的映射，用于批量写入文件"
-  value = merge(
-    {
-      "nginx.conf"           = local.nginx_conf_content
-      "conf.d/upstream.conf" = local.upstream_conf_content
-    },
-    {
-      for service_name, content in local.server_configs :
-      "conf.d/servers/${service_name}.conf" => content
-    }
-  )
+  value = {
+    "nginx.conf"           = local.nginx_conf_content
+    "conf.d/upstream.conf" = local.upstream_conf_content
+    "conf.d/servers.conf"  = local.servers_conf_content
+  }
 }

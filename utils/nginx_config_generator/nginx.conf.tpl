@@ -118,5 +118,5 @@ ${custom_global_config}
     include /etc/nginx/conf.d/upstream.conf;
 
     # 服务配置
-    include /etc/nginx/conf.d/servers/*.conf;
+    include /etc/nginx/conf.d/servers.conf;
 }

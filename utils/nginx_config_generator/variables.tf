@@ -49,8 +49,8 @@ variable "log_format" {
   }
 }
 
-variable "upstreams" {
-  description = "上游服务器配置"
+variable "shared_upstreams" {
+  description = "共享的上游服务器配置（可被多个服务引用）"
   type = map(object({
     servers = list(object({
       address      = string
@@ -67,7 +67,7 @@ variable "upstreams" {
 
   validation {
     condition = alltrue([
-      for name, upstream in var.upstreams : alltrue([
+      for name, upstream in var.shared_upstreams : alltrue([
         for server in upstream.servers :
         server.port > 0 && server.port <= 65535
       ])
@@ -77,7 +77,7 @@ variable "upstreams" {
 
   validation {
     condition = alltrue([
-      for name, upstream in var.upstreams : alltrue([
+      for name, upstream in var.shared_upstreams : alltrue([
         for server in upstream.servers :
         server.max_fails >= 0 && server.max_fails <= 100
       ])
@@ -87,9 +87,23 @@ variable "upstreams" {
 }
 
 variable "services" {
-  description = "服务配置"
+  description = "服务配置（支持内联upstream或引用shared_upstreams）"
   type = map(object({
-    upstream = string # 对应的upstream名称
+    # Upstream配置（二选一）
+    upstream_ref = optional(string, "") # 引用shared_upstreams中的upstream名称
+    upstream_inline = optional(object({ # 内联upstream配置
+      servers = list(object({
+        address      = string
+        port         = number
+        max_fails    = optional(number, 3)
+        fail_timeout = optional(string, "30s")
+        weight       = optional(number, 1)
+        backup       = optional(bool, false)
+      }))
+      keepalive         = optional(number, 32)
+      keepalive_timeout = optional(string, "60s")
+    }), null)
+
     domains = list(object({
       domain              = string
       http_enabled        = optional(bool, true)
@@ -121,9 +135,40 @@ variable "services" {
   validation {
     condition = alltrue([
       for name, service in var.services :
-      contains(keys(var.upstreams), service.upstream) || service.upstream == ""
+      (service.upstream_ref != "" && service.upstream_inline == null) ||
+      (service.upstream_ref == "" && service.upstream_inline != null)
     ])
-    error_message = "服务引用的upstream必须在upstreams变量中定义"
+    error_message = "每个服务必须指定upstream_ref或upstream_inline，且只能二选一"
+  }
+
+  validation {
+    condition = alltrue([
+      for name, service in var.services :
+      service.upstream_ref == "" || contains(keys(var.shared_upstreams), service.upstream_ref)
+    ])
+    error_message = "upstream_ref引用的upstream必须在shared_upstreams中定义"
+  }
+
+  validation {
+    condition = alltrue([
+      for name, service in var.services :
+      service.upstream_inline == null || alltrue([
+        for server in service.upstream_inline.servers :
+        server.port > 0 && server.port <= 65535
+      ])
+    ])
+    error_message = "内联upstream的所有服务器端口必须在1-65535之间"
+  }
+
+  validation {
+    condition = alltrue([
+      for name, service in var.services :
+      service.upstream_inline == null || alltrue([
+        for server in service.upstream_inline.servers :
+        server.max_fails >= 0 && server.max_fails <= 100
+      ])
+    ])
+    error_message = "内联upstream的max_fails必须在0-100之间"
   }
 }
 
