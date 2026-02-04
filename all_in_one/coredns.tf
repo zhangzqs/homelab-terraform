@@ -27,23 +27,14 @@ module "pve_lxc_instance_coredns" {
   cache_serve_stale = 86400
 
   # 可选：Hosts记录（精确匹配）
-  hosts = [
-    {
-      hostname = "1.my-custom-host.local"
-      ip       = "192.212.12.12"
-    }
-  ]
+  hosts = []
 
   # 可选：泛域名配置（支持*.example.com形式的通配符）
   wildcard_domains = [
     {
-      zone = "my-custom-host.local",
-      ip   = "192.168.145.12",
-    },
-    {
-      zone = "example.local",
-      ip   = "192.168.145.10",
-    },
+      zone = var.home_base_domain
+      ip   = local.pve_vm_id_lxc_nginx
+    }
   ]
 
   providers = {

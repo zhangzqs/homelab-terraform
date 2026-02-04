@@ -116,6 +116,20 @@ locals {
   nginx_service_content = templatefile("${path.module}/templates/nginx.service.tpl", {
     working_dir = var.working_dir
   })
+
+  setup_systemd_service_command = [
+    "mkdir -p ${var.working_dir}/conf.d",
+    "mkdir -p ${var.working_dir}/logs",
+    "mkdir -p ${var.working_dir}/cache/proxy",
+    "mkdir -p ${var.working_dir}/ssl",
+    "chmod 755 ${var.working_dir}",
+    "chmod 755 ${var.working_dir}/conf.d",
+    "chmod 755 ${var.working_dir}/logs",
+    "chmod 755 ${var.working_dir}/cache",
+    "chmod 755 ${var.working_dir}/ssl",
+    "systemctl daemon-reload",
+    "systemctl enable nginx.service",
+  ]
 }
 
 resource "null_resource" "setup_systemd_service" {
@@ -126,6 +140,7 @@ resource "null_resource" "setup_systemd_service" {
   triggers = {
     version      = 1
     service_hash = sha256(local.nginx_service_content)
+    command_hash = sha256(join("", local.setup_systemd_service_command))
   }
 
   provisioner "file" {
@@ -150,17 +165,7 @@ resource "null_resource" "setup_systemd_service" {
       timeout     = "2m"
     }
 
-    inline = [
-      "mkdir -p ${var.working_dir}/conf.d",
-      "mkdir -p ${var.working_dir}/logs",
-      "mkdir -p ${var.working_dir}/cache/proxy",
-      "chmod 755 ${var.working_dir}",
-      "chmod 755 ${var.working_dir}/conf.d",
-      "chmod 755 ${var.working_dir}/logs",
-      "chmod 755 ${var.working_dir}/cache",
-      "systemctl daemon-reload",
-      "systemctl enable nginx.service",
-    ]
+    inline = local.setup_systemd_service_command
   }
 }
 
@@ -173,7 +178,7 @@ resource "null_resource" "deploy_nginx_configs" {
   ]
 
   triggers = {
-    version     = 1
+    version     = 2
     config_hash = sha256(each.value)
   }
 
@@ -200,6 +205,10 @@ resource "null_resource" "restart_nginx" {
   triggers = {
     version     = 1
     config_hash = sha256(jsonencode(var.nginx_configs))
+    before_step_ids = join(",", [
+      for r in null_resource.deploy_nginx_configs :
+      r.id
+    ])
   }
 
   provisioner "remote-exec" {

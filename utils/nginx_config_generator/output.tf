@@ -79,17 +79,3 @@ output "servers_conf" {
   description = "所有服务的server配置合并后的内容（单个文件）"
   value       = local.servers_conf_content
 }
-
-output "server_configs" {
-  description = "各服务的server配置文件内容（按服务名分组，用于需要分离文件的场景）"
-  value       = local.server_config_contents
-}
-
-output "all_configs" {
-  description = "所有配置文件的映射，用于批量写入文件"
-  value = {
-    "nginx.conf"           = local.nginx_conf_content
-    "conf.d/upstream.conf" = local.upstream_conf_content
-    "conf.d/servers.conf"  = local.servers_conf_content
-  }
-}
