@@ -19,9 +19,15 @@
 - [Terraform](https://www.terraform.io/) >= 1.0
 - 网络可访问 Proxmox VE API
 
+## 📊 架构图
+
+![Terraform 架构图](all_in_one/graph.svg)
+
+> Terraform 资源依赖关系图,展示各个模块之间的依赖关系和数据流向。
+
 ## 📁 项目结构
 
-```
+```text
 .
 ├── all_in_one/           # 一键部署入口（推荐使用）
 │   ├── code_server.tf    # Code Server LXC 容器配置
@@ -116,13 +122,13 @@ terraform output
 
 ## 📊 资源分配
 
-| 资源名称 | 类型 | VM ID | IP 地址 |
-|---------|------|-------|---------|
-| Mihomo Proxy | LXC | 200 | 192.168.242.200 |
-| Code Server | LXC | 201 | 192.168.242.201 |
-| K3s Master | VM | 202 | 192.168.242.202 |
-| Storage Server | LXC | 203 | 192.168.242.203 |
-| CoreDNS | LXC | 204 | 192.168.242.204 |
+| 资源名称       | 类型 | VM ID | IP 地址         |
+| -------------- | ---- | ----- | --------------- |
+| Mihomo Proxy   | LXC  | 200   | 192.168.242.200 |
+| Code Server    | LXC  | 201   | 192.168.242.201 |
+| K3s Master     | VM   | 202   | 192.168.242.202 |
+| Storage Server | LXC  | 203   | 192.168.242.203 |
+| CoreDNS        | LXC  | 204   | 192.168.242.204 |
 
 > **注意**：IP 地址和 VM ID 可以在 `all_in_one/locals.tf` 中自定义修改。
 
@@ -130,16 +136,16 @@ terraform output
 
 ### 必需变量
 
-| 变量名 | 类型 | 说明 |
-|--------|------|------|
+| 变量名         | 类型   | 说明                                                        |
+| -------------- | ------ | ----------------------------------------------------------- |
 | `pve_endpoint` | string | Proxmox VE API 端点 URL（如：`https://192.168.1.100:8006`） |
-| `pve_password` | string | Proxmox VE root 用户密码 |
+| `pve_password` | string | Proxmox VE root 用户密码                                    |
 
 ### 可选变量
 
-| 变量名 | 类型 | 默认值 | 说明 |
-|--------|------|--------|------|
-| `mihomo_proxy_vars` | object | `{}` | Mihomo 代理配置，包含订阅源和自定义代理 |
+| 变量名              | 类型   | 默认值 | 说明                                    |
+| ------------------- | ------ | ------ | --------------------------------------- |
+| `mihomo_proxy_vars` | object | `{}`   | Mihomo 代理配置，包含订阅源和自定义代理 |
 
 ## 🔧 高级用法
 
@@ -156,7 +162,7 @@ module "k3s_master" {
   pve_endpoint          = "https://your-pve-host:8006"
   pve_username          = "root@pam"
   pve_password          = "your-password"
-  
+
   vm_id                    = 200
   ubuntu_cloud_image_id    = "local:iso/ubuntu-24.04-cloudimg-amd64.img"
   network_interface_bridge = "vmbr0"
@@ -174,7 +180,7 @@ module "k3s_master" {
 locals {
   pve_default_network_bridge = "vmbr0"          # 网络桥接设备
   pve_default_ipv4_gateway   = "192.168.242.1"  # 默认网关
-  
+
   # 自定义 IP 地址
   pve_ipv4_address_lxc_mihomo_proxy = "192.168.242.200"
   pve_ipv4_address_lxc_code_server  = "192.168.242.201"
@@ -192,6 +198,7 @@ terraform destroy
 ## 📈 代码统计
 
 <!-- tokei-start -->
+
 ```
 ===============================================================================
  Language            Files        Lines         Code     Comments       Blanks
@@ -210,6 +217,7 @@ terraform destroy
  Total                 105         7317         5263          967         1087
 ===============================================================================
 ```
+
 <!-- tokei-end -->
 
 ## 🧪 集成测试 (CI)
