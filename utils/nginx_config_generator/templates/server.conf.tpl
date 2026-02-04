@@ -11,7 +11,13 @@ server {
 %{ if location.proxy_pass != "" }
         proxy_pass ${location.proxy_pass};
 %{ else }
-        proxy_pass http://${upstream};
+        proxy_pass ${proxy_config.backend_protocol}://${upstream};
+%{ endif }
+%{ if proxy_config.backend_protocol == "https" && !proxy_config.ssl_verify }
+
+        # 后端HTTPS配置
+        proxy_ssl_verify off;
+        proxy_ssl_server_name on;
 %{ endif }
 
         # WebSocket支持
@@ -45,7 +51,13 @@ server {
 %{ else }
 
     location / {
-        proxy_pass http://${upstream};
+        proxy_pass ${proxy_config.backend_protocol}://${upstream};
+%{ if proxy_config.backend_protocol == "https" && !proxy_config.ssl_verify }
+
+        # 后端HTTPS配置
+        proxy_ssl_verify off;
+        proxy_ssl_server_name on;
+%{ endif }
 
         # WebSocket支持
 %{ if proxy_config.enable_websocket }
@@ -101,7 +113,13 @@ server {
 %{ if location.proxy_pass != "" }
         proxy_pass ${location.proxy_pass};
 %{ else }
-        proxy_pass http://${upstream};
+        proxy_pass ${proxy_config.backend_protocol}://${upstream};
+%{ endif }
+%{ if proxy_config.backend_protocol == "https" && !proxy_config.ssl_verify }
+
+        # 后端HTTPS配置
+        proxy_ssl_verify off;
+        proxy_ssl_server_name on;
 %{ endif }
 
         # WebSocket支持
@@ -135,7 +153,13 @@ server {
 %{ else }
 
     location / {
-        proxy_pass http://${upstream};
+        proxy_pass ${proxy_config.backend_protocol}://${upstream};
+%{ if proxy_config.backend_protocol == "https" && !proxy_config.ssl_verify }
+
+        # 后端HTTPS配置
+        proxy_ssl_verify off;
+        proxy_ssl_server_name on;
+%{ endif }
 
         # WebSocket支持
 %{ if proxy_config.enable_websocket }

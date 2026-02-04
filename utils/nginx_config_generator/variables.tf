@@ -151,6 +151,8 @@ variable "services" {
       send_timeout         = optional(string, "1000s")
       client_max_body_size = optional(string, "8192M")
       proxy_buffering      = optional(bool, false)
+      backend_protocol     = optional(string, "http") # 后端协议: http 或 https
+      ssl_verify           = optional(bool, false)    # 是否验证后端SSL证书
     }), {})
   }))
   default = {}

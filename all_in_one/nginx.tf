@@ -13,12 +13,16 @@ module "nginx_config" {
       domains = [
         {
           domain              = "pve.${var.home_base_domain}"
-          http_enabled        = false
+          http_enabled        = true
           https_enabled       = true
           ssl_certificate     = "/root/nginx/ssl/home_base_domain.crt"
           ssl_certificate_key = "/root/nginx/ssl/home_base_domain.key"
         }
       ]
+      proxy_config = {
+        backend_protocol = "https"
+        ssl_verify       = false
+      }
     }
     code-server = {
       upstream_inline = {
@@ -29,7 +33,7 @@ module "nginx_config" {
       domains = [
         {
           domain              = "code-server.${var.home_base_domain}"
-          http_enabled        = false
+          http_enabled        = true
           https_enabled       = true
           ssl_certificate     = "/root/nginx/ssl/home_base_domain.crt"
           ssl_certificate_key = "/root/nginx/ssl/home_base_domain.key"
