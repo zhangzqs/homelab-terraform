@@ -158,8 +158,8 @@ resource "null_resource" "deploy_nginx_configs" {
   ]
 
   triggers = {
-    version      = 1
-    config_hash  = sha256(jsonencode(var.nginx_configs))
+    version     = 1
+    config_hash = sha256(jsonencode(var.nginx_configs))
   }
 
   # 上传nginx.conf
