@@ -11,9 +11,9 @@ server {
 %{ if location.proxy_pass != "" }
         proxy_pass ${location.proxy_pass};
 %{ else }
-        proxy_pass ${proxy_config.backend_protocol}://${upstream};
+        proxy_pass ${ proxy_config.backend_https ? "https" : "http" }://${upstream};
 %{ endif }
-%{ if proxy_config.backend_protocol == "https" && !proxy_config.ssl_verify }
+%{ if proxy_config.backend_https && !proxy_config.ssl_verify }
 
         # 后端HTTPS配置
         proxy_ssl_verify off;
@@ -51,8 +51,8 @@ server {
 %{ else }
 
     location / {
-        proxy_pass ${proxy_config.backend_protocol}://${upstream};
-%{ if proxy_config.backend_protocol == "https" && !proxy_config.ssl_verify }
+        proxy_pass ${ proxy_config.backend_https ? "https" : "http" }://${upstream};
+%{ if proxy_config.backend_https && !proxy_config.ssl_verify }
 
         # 后端HTTPS配置
         proxy_ssl_verify off;
@@ -113,9 +113,9 @@ server {
 %{ if location.proxy_pass != "" }
         proxy_pass ${location.proxy_pass};
 %{ else }
-        proxy_pass ${proxy_config.backend_protocol}://${upstream};
+        proxy_pass ${ proxy_config.backend_https ? "https" : "http" }://${upstream};
 %{ endif }
-%{ if proxy_config.backend_protocol == "https" && !proxy_config.ssl_verify }
+%{ if proxy_config.backend_https && !proxy_config.ssl_verify }
 
         # 后端HTTPS配置
         proxy_ssl_verify off;
@@ -153,8 +153,8 @@ server {
 %{ else }
 
     location / {
-        proxy_pass ${proxy_config.backend_protocol}://${upstream};
-%{ if proxy_config.backend_protocol == "https" && !proxy_config.ssl_verify }
+        proxy_pass ${ proxy_config.backend_https ? "https" : "http" }://${upstream};
+%{ if proxy_config.backend_https && !proxy_config.ssl_verify }
 
         # 后端HTTPS配置
         proxy_ssl_verify off;

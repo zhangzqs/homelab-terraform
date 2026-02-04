@@ -20,8 +20,8 @@ module "nginx_config" {
         }
       ]
       proxy_config = {
-        backend_protocol = "https"
-        ssl_verify       = false
+        backend_https = true
+        ssl_verify    = false
       }
     }
     code-server = {
