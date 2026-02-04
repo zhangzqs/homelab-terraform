@@ -200,13 +200,6 @@ module "nginx_config" {
         {
           path       = "/static"
           proxy_pass = "http://static_backend"
-        },
-        {
-          path = "/health"
-          custom_config = <<-EOT
-            return 200 "OK";
-            add_header Content-Type text/plain;
-          EOT
         }
       ]
     }
@@ -256,14 +249,17 @@ resource "local_file" "nginx_configs" {
 
 ### 基础配置
 
-| 变量名               | 类型     | 默认值   | 说明                        |
-|---------------------|---------|---------|----------------------------|
-| `worker_processes`  | string  | "auto"  | Worker进程数                |
-| `worker_connections`| number  | 102400  | 每个worker的最大连接数         |
-| `enable_vts`        | bool    | true    | 是否启用VTS监控模块            |
-| `vts_status_port`   | number  | 80      | VTS监控端口                  |
-| `enable_gzip`       | bool    | true    | 是否启用gzip压缩              |
-| `log_format`        | string  | "json"  | 日志格式（json/standard）     |
+| 变量名               | 类型   | 默认值                      | 说明                      |
+| -------------------- | ------ | --------------------------- | ------------------------- |
+| `worker_processes`   | string | "auto"                      | Worker进程数              |
+| `worker_connections` | number | 102400                      | 每个worker的最大连接数    |
+| `enable_vts`         | bool   | true                        | 是否启用VTS监控模块       |
+| `vts_status_port`    | number | 80                          | VTS监控端口               |
+| `enable_gzip`        | bool   | true                        | 是否启用gzip压缩          |
+| `log_format`         | string | "json"                      | 日志格式（json/standard） |
+| `access_log_path`    | string | "/var/log/nginx/access.log" | 访问日志文件路径          |
+| `error_log_path`     | string | "/var/log/nginx/error.log"  | 错误日志文件路径          |
+| `error_log_level`    | string | "warn"                      | 错误日志级别              |
 
 ### Upstream 配置
 
@@ -328,9 +324,6 @@ services = {
       client_max_body_size = 请求Body大小限制（默认"8192M"）
       proxy_buffering      = 是否启用代理缓冲（默认false）
     }
-
-    # 自定义配置（可选）
-    custom_server_config = "自定义server配置片段"
   }
 }
 ```
@@ -341,9 +334,15 @@ services = {
 utils/nginx_config_generator/
 ├── variables.tf          # 输入变量定义
 ├── output.tf            # 输出定义和配置生成逻辑
-├── nginx.conf.tpl       # Nginx主配置模板
-├── upstream.conf.tpl    # Upstream配置模板
-├── server.conf.tpl      # Server配置模板
+├── templates/           # 模板文件目录
+│   ├── nginx.conf.tpl   # Nginx主配置模板
+│   ├── upstream.conf.tpl # Upstream配置模板
+│   └── server.conf.tpl  # Server配置模板
+├── tests/               # 测试文件目录
+│   ├── inline_upstream.tftest.hcl
+│   ├── shared_upstream.tftest.hcl
+│   ├── hybrid_mode.tftest.hcl
+│   └── run_tests.sh     # 测试运行脚本
 └── README.md           # 文档
 ```
 
@@ -359,15 +358,15 @@ utils/nginx_config_generator/
 
 ## 与 Ansible 版本的对比
 
-| 特性           | Ansible (Jinja2)   | Terraform (HCL)         |
-|----------------|-------------------|------------------------|
-| 模板语言        | Jinja2            | Terraform Template     |
-| 变量定义        | YAML              | HCL                    |
-| Upstream配置    | 分离式             | 内联+共享两种模式        |
-| 类型检查        | 无                | 强类型+验证规则          |
-| 状态管理        | 无                | Terraform State        |
-| 幂等性          | Ansible保证        | Terraform保证          |
-| 使用场景        | 配置管理           | 基础设施即代码          |
+| 特性         | Ansible (Jinja2) | Terraform (HCL)    |
+| ------------ | ---------------- | ------------------ |
+| 模板语言     | Jinja2           | Terraform Template |
+| 变量定义     | YAML             | HCL                |
+| Upstream配置 | 分离式           | 内联+共享两种模式  |
+| 类型检查     | 无               | 强类型+验证规则    |
+| 状态管理     | 无               | Terraform State    |
+| 幂等性       | Ansible保证      | Terraform保证      |
+| 使用场景     | 配置管理         | 基础设施即代码     |
 
 ## 注意事项
 
@@ -383,14 +382,6 @@ utils/nginx_config_generator/
 - **使用内联 upstream**：服务独占后端，配置简单直观
 - **使用共享 upstream**：多个服务共享同一个后端集群
 - **混合使用**：根据实际需求灵活组合
-
-## 扩展
-
-可以通过以下方式扩展功能：
-
-1. **自定义全局配置**: 使用 `custom_global_config` 变量
-2. **自定义服务配置**: 使用 `custom_server_config` 字段
-3. **自定义 Location**: 在 `locations` 中使用 `custom_config` 字段
 
 ## License
 

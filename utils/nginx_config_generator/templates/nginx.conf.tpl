@@ -3,7 +3,7 @@ worker_processes  ${worker_processes};
 worker_rlimit_nofile 102400;
 timer_resolution 1000ms;
 
-error_log  /dev/stderr warn;
+error_log  ${error_log_path} ${error_log_level};
 pid        /var/run/nginx.pid;
 
 events {
@@ -79,14 +79,14 @@ http {
         '"http_cookie":"$http_cookie"'
     '}';
 
-    access_log  /dev/stdout  json_main;
+    access_log  ${access_log_path}  json_main;
 %{ else }
 
     log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
 
-    access_log  /dev/stdout  main;
+    access_log  ${access_log_path}  main;
 %{ endif }
 %{ if enable_gzip }
 
@@ -108,11 +108,6 @@ http {
         max_size=10G
         inactive=7d
         use_temp_path=off;
-%{ if custom_global_config != "" }
-
-    # 自定义全局配置
-${custom_global_config}
-%{ endif }
 
     # 上游服务器配置
     include /etc/nginx/conf.d/upstream.conf;

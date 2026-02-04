@@ -49,6 +49,29 @@ variable "log_format" {
   }
 }
 
+variable "access_log_path" {
+  description = "访问日志文件路径"
+  type        = string
+  default     = "/var/log/nginx/access.log"
+}
+
+variable "error_log_path" {
+  description = "错误日志文件路径"
+  type        = string
+  default     = "/var/log/nginx/error.log"
+}
+
+variable "error_log_level" {
+  description = "错误日志级别"
+  type        = string
+  default     = "warn"
+
+  validation {
+    condition     = contains(["debug", "info", "notice", "warn", "error", "crit", "alert", "emerg"], var.error_log_level)
+    error_message = "错误日志级别必须是: debug, info, notice, warn, error, crit, alert, emerg 之一"
+  }
+}
+
 variable "shared_upstreams" {
   description = "共享的上游服务器配置（可被多个服务引用）"
   type = map(object({
@@ -112,9 +135,8 @@ variable "services" {
       ssl_certificate_key = optional(string, "")
     }))
     locations = optional(list(object({
-      path          = string
-      proxy_pass    = optional(string, "") # 如果为空，则使用upstream
-      custom_config = optional(string, "")
+      path       = string
+      proxy_pass = optional(string, "") # 如果为空，则使用upstream
     })), [])
 
     # 代理配置
@@ -126,9 +148,6 @@ variable "services" {
       client_max_body_size = optional(string, "8192M")
       proxy_buffering      = optional(bool, false)
     }), {})
-
-    # 自定义配置片段
-    custom_server_config = optional(string, "")
   }))
   default = {}
 
@@ -182,10 +201,4 @@ variable "ssl_common_config" {
     session_timeout       = optional(string, "10m")
   })
   default = {}
-}
-
-variable "custom_global_config" {
-  description = "自定义全局配置（插入到http块中）"
-  type        = string
-  default     = ""
 }

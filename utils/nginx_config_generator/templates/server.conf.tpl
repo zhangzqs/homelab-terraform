@@ -13,9 +13,6 @@ server {
 %{ else }
         proxy_pass http://${upstream};
 %{ endif }
-%{ if location.custom_config != "" }
-${location.custom_config}
-%{ else }
 
         # WebSocket支持
 %{ if proxy_config.enable_websocket }
@@ -42,7 +39,6 @@ ${location.custom_config}
 
         # 代理缓冲配置
         proxy_buffering ${ proxy_config.proxy_buffering ? "on" : "off" };
-%{ endif }
 %{ endif }
     }
 %{ endfor ~}
@@ -78,11 +74,6 @@ ${location.custom_config}
         proxy_buffering ${ proxy_config.proxy_buffering ? "on" : "off" };
 %{ endif }
     }
-%{ endif }
-%{ if custom_server_config != "" }
-
-    # 自定义服务器配置
-${custom_server_config}
 %{ endif }
 }
 %{ endif }
@@ -112,9 +103,6 @@ server {
 %{ else }
         proxy_pass http://${upstream};
 %{ endif }
-%{ if location.custom_config != "" }
-${location.custom_config}
-%{ else }
 
         # WebSocket支持
 %{ if proxy_config.enable_websocket }
@@ -141,7 +129,6 @@ ${location.custom_config}
 
         # 代理缓冲配置
         proxy_buffering ${ proxy_config.proxy_buffering ? "on" : "off" };
-%{ endif }
 %{ endif }
     }
 %{ endfor ~}
@@ -177,11 +164,6 @@ ${location.custom_config}
         proxy_buffering ${ proxy_config.proxy_buffering ? "on" : "off" };
 %{ endif }
     }
-%{ endif }
-%{ if custom_server_config != "" }
-
-    # 自定义服务器配置
-${custom_server_config}
 %{ endif }
 }
 %{ endif }

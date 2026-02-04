@@ -1,13 +1,15 @@
 locals {
   # 生成nginx主配置文件
-  nginx_conf_content = templatefile("${path.module}/nginx.conf.tpl", {
-    worker_processes     = var.worker_processes
-    worker_connections   = var.worker_connections
-    enable_vts           = var.enable_vts
-    vts_status_port      = var.vts_status_port
-    enable_gzip          = var.enable_gzip
-    log_format           = var.log_format
-    custom_global_config = var.custom_global_config
+  nginx_conf_content = templatefile("${path.module}/templates/nginx.conf.tpl", {
+    worker_processes   = var.worker_processes
+    worker_connections = var.worker_connections
+    enable_vts         = var.enable_vts
+    vts_status_port    = var.vts_status_port
+    enable_gzip        = var.enable_gzip
+    log_format         = var.log_format
+    access_log_path    = var.access_log_path
+    error_log_path     = var.error_log_path
+    error_log_level    = var.error_log_level
   })
 
   # 从services中提取内联的upstream配置，并为其生成唯一名称
@@ -27,14 +29,14 @@ locals {
   }
 
   # 生成upstream配置文件
-  upstream_conf_content = templatefile("${path.module}/upstream.conf.tpl", {
+  upstream_conf_content = templatefile("${path.module}/templates/upstream.conf.tpl", {
     upstreams = local.all_upstreams
   })
 
   # 为每个服务生成独立的server配置内容
   server_config_contents = {
     for service_name, service in var.services :
-    service_name => templatefile("${path.module}/server.conf.tpl", {
+    service_name => templatefile("${path.module}/templates/server.conf.tpl", {
       service_name = service_name
       upstream     = local.service_upstream_map[service_name]
       domains      = service.domains
@@ -47,7 +49,6 @@ locals {
         client_max_body_size = "8192M"
         proxy_buffering      = false
       }, service.proxy_config)
-      custom_server_config      = service.custom_server_config
       ssl_protocols             = var.ssl_common_config.protocols != null ? var.ssl_common_config.protocols : "TLSv1.2 TLSv1.3"
       ssl_ciphers               = var.ssl_common_config.ciphers != null ? var.ssl_common_config.ciphers : "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256"
       ssl_prefer_server_ciphers = var.ssl_common_config.prefer_server_ciphers != null ? var.ssl_common_config.prefer_server_ciphers : true
