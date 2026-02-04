@@ -6,7 +6,7 @@
 
 - 🚀 **自动化部署**：一键创建和配置 Nginx LXC 容器
 - 📦 **配置管理**：自动从 nginx_config_generator 模块获取配置并部署
-- ⚙️  **自定义 Systemd**：使用自定义的 systemd 服务管理 Nginx
+- ⚙️ **自定义 Systemd**：使用自定义的 systemd 服务管理 Nginx
 - 🔄 **配置更新**：支持配置变更后自动重新部署
 - 🔐 **SSH 密钥认证**：自动生成 ED25519 密钥对
 - 🌐 **网络配置**：支持自定义 IP、网关配置
@@ -63,33 +63,33 @@ output "nginx_password" {
 
 ### 必需变量
 
-| 变量名                    | 类型        | 说明                          |
-|--------------------------|-------------|------------------------------|
-| `vm_id`                  | number      | LXC容器ID                     |
-| `ubuntu_template_file_id`| string      | Ubuntu LXC模板文件ID          |
-| `ipv4_address`           | string      | 容器IPv4地址                  |
-| `ipv4_gateway`           | string      | 容器IPv4网关                  |
-| `nginx_configs`          | map(string) | Nginx配置文件映射             |
+| 变量名                    | 类型        | 说明                 |
+| ------------------------- | ----------- | -------------------- |
+| `vm_id`                   | number      | LXC容器ID            |
+| `ubuntu_template_file_id` | string      | Ubuntu LXC模板文件ID |
+| `ipv4_address`            | string      | 容器IPv4地址         |
+| `ipv4_gateway`            | string      | 容器IPv4网关         |
+| `nginx_configs`           | map(string) | Nginx配置文件映射    |
 
 ### 可选变量
 
-| 变量名                      | 类型   | 默认值  | 说明                          |
-|----------------------------|--------|---------|------------------------------|
-| `pve_node_name`            | string | "pve"   | Proxmox节点名称               |
-| `hostname`                 | string | "nginx" | 容器主机名                    |
-| `network_interface_bridge` | string | "vmbr0" | 网络接口桥接设备              |
-| `ipv4_address_cidr`        | number | 24      | IPv4地址CIDR前缀长度          |
+| 变量名                     | 类型   | 默认值  | 说明                 |
+| -------------------------- | ------ | ------- | -------------------- |
+| `pve_node_name`            | string | "pve"   | Proxmox节点名称      |
+| `hostname`                 | string | "nginx" | 容器主机名           |
+| `network_interface_bridge` | string | "vmbr0" | 网络接口桥接设备     |
+| `ipv4_address_cidr`        | number | 24      | IPv4地址CIDR前缀长度 |
 
 ## 输出变量
 
-| 变量名             | 说明                     |
-|-------------------|--------------------------|
-| `container_id`    | LXC容器的ID              |
-| `container_vmid`  | LXC容器的VMID            |
-| `container_ip`    | LXC容器的IP地址          |
-| `hostname`        | 容器的主机名             |
-| `ssh_private_key` | SSH私钥（敏感）          |
-| `root_password`   | Root密码（敏感）         |
+| 变量名            | 说明             |
+| ----------------- | ---------------- |
+| `container_id`    | LXC容器的ID      |
+| `container_vmid`  | LXC容器的VMID    |
+| `container_ip`    | LXC容器的IP地址  |
+| `hostname`        | 容器的主机名     |
+| `ssh_private_key` | SSH私钥（敏感）  |
+| `root_password`   | Root密码（敏感） |
 
 ## 工作流程
 
@@ -100,7 +100,7 @@ output "nginx_password" {
 
 ## 容器内目录结构
 
-```
+```text
 /root/nginx/
 ├── config/
 │   ├── nginx.conf          # 主配置文件
@@ -114,7 +114,7 @@ output "nginx_password" {
 
 ## 目录结构
 
-```
+```text
 pve/lxcs/nginx/
 ├── main.tf            # 主配置文件
 ├── variables.tf       # 变量定义

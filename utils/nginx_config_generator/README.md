@@ -330,7 +330,7 @@ services = {
 
 ## 目录结构
 
-```
+```text
 utils/nginx_config_generator/
 ├── variables.tf          # 输入变量定义
 ├── output.tf            # 输出定义和配置生成逻辑
