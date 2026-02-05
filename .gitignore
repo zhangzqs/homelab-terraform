@@ -39,3 +39,5 @@ terraform.rc
 .terraform.lock.hcl
 tokei.json
 tokei.txt
+
+.claude
