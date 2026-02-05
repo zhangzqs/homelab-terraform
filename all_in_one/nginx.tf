@@ -13,7 +13,7 @@ module "nginx_config" {
       domains = [
         {
           domain              = "pve.${var.home_base_domain}"
-          http_enabled        = true
+          http_enabled        = false
           https_enabled       = true
           ssl_certificate     = "/root/nginx/ssl/home_base_domain.crt"
           ssl_certificate_key = "/root/nginx/ssl/home_base_domain.key"
@@ -33,7 +33,7 @@ module "nginx_config" {
       domains = [
         {
           domain              = "code-server.${var.home_base_domain}"
-          http_enabled        = true
+          http_enabled        = false
           https_enabled       = true
           ssl_certificate     = "/root/nginx/ssl/home_base_domain.crt"
           ssl_certificate_key = "/root/nginx/ssl/home_base_domain.key"

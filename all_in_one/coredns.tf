@@ -33,7 +33,7 @@ module "pve_lxc_instance_coredns" {
   wildcard_domains = [
     {
       zone = var.home_base_domain
-      ip   = local.pve_vm_id_lxc_nginx
+      ip   = local.pve_ipv4_address_lxc_nginx
     }
   ]
 

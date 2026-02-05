@@ -79,3 +79,10 @@ variable "home_base_domain" {
   description = "家庭网络使用的DNS泛域名，例如：home.example.com，表示所有*.home.example.com的域名都解析到家庭网络"
   type        = string
 }
+
+# code-server访问密码
+variable "code_server_password" {
+  description = "code-server访问密码"
+  type        = string
+  sensitive   = true
+}

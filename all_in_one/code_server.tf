@@ -17,6 +17,7 @@ module "pve_lxc_instance_code_server" {
     http_proxy  = local.mihomo_http_proxy_address
     https_proxy = local.mihomo_http_proxy_address
   }
+  code_server_password = var.code_server_password
 
   providers = {
     proxmox = proxmox
