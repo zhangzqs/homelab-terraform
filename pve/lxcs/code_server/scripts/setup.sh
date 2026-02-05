@@ -14,6 +14,7 @@ apt-get update && apt-get install -y \
     openssh-server \
     htop \
     git \
-    sudo
+    sudo \
+    jq
 
 echo "Basic setup completed. Use install-code-server.sh to install code-server separately."
