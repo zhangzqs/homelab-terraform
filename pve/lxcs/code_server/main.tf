@@ -180,6 +180,13 @@ locals {
     http_proxy  = var.install_proxy != null ? var.install_proxy.http_proxy : ""
     https_proxy = var.install_proxy != null ? var.install_proxy.https_proxy : ""
   })
+
+  install_copilot_extensions_script = templatefile("${path.module}/scripts/install-copilot-extensions.sh.tpl", {
+    has_proxy     = var.install_proxy != null
+    http_proxy    = var.install_proxy != null ? var.install_proxy.http_proxy : ""
+    https_proxy   = var.install_proxy != null ? var.install_proxy.https_proxy : ""
+    user_data_dir = "${var.working_dir}/user-data"
+  })
 }
 
 resource "null_resource" "setup_code_server_config" {
@@ -249,6 +256,47 @@ resource "null_resource" "setup_systemd_service" {
       "systemctl restart code-server.service",
       "sleep 3",
       "systemctl status code-server.service --no-pager || true",
+    ]
+  }
+}
+
+resource "null_resource" "install_copilot_extensions" {
+  depends_on = [
+    null_resource.setup_systemd_service
+  ]
+
+  triggers = {
+    version     = 1
+    res_vm_id   = proxmox_virtual_environment_container.code_server_container.id
+    script_hash = sha256(local.install_copilot_extensions_script)
+  }
+
+  provisioner "file" {
+    content     = local.install_copilot_extensions_script
+    destination = "/tmp/install-copilot-extensions.sh"
+
+    connection {
+      type        = "ssh"
+      user        = "root"
+      host        = var.ipv4_address
+      private_key = tls_private_key.container_key.private_key_pem
+      timeout     = "5m"
+    }
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      user        = "root"
+      host        = var.ipv4_address
+      private_key = tls_private_key.container_key.private_key_pem
+      timeout     = "10m"
+    }
+
+    inline = [
+      "chmod +x /tmp/install-copilot-extensions.sh",
+      "/tmp/install-copilot-extensions.sh",
+      "rm -f /tmp/install-copilot-extensions.sh",
     ]
   }
 }
