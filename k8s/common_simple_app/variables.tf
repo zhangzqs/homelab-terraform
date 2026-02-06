@@ -143,14 +143,23 @@ variable "httproute_hostnames" {
 variable "httproute_rules" {
   description = "HTTPRoute 流量转发规则列表"
   type = list(object({
-    matches = list(object({
-      path = object({
-        type  = optional(string, "PathPrefix")
-        value = optional(string, "/")
-      })
-    }))
+    matches = optional(
+      list(object({
+        path = object({
+          type  = string
+          value = string
+        })
+      })),
+      [ // 默认匹配根路径 
+        {
+          path = {
+            type  = "PathPrefix"
+            value = "/"
+          }
+        }
+      ],
+    )
     backendRefs = list(object({
-      name = string
       port = number
     }))
   }))

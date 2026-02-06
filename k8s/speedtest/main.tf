@@ -1,4 +1,4 @@
-module "speedtest_test" {
+module "speedtest" {
   source = "../common_simple_app"
 
   providers = {
@@ -26,6 +26,13 @@ module "speedtest_test" {
     }
   ]
 
-  httproute_enabled   = true
-  httproute_hostnames = [var.httproute_hostname]
+  httproute_enabled = true
+  httproute_hostnames = [
+    var.httproute_hostname
+  ]
+  httproute_rules = [
+    { backendRefs = [{ port = 80 }] }
+  ]
+  gateway_name      = var.gateway_name
+  gateway_namespace = var.gateway_namespace
 }

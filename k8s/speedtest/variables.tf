@@ -1,7 +1,6 @@
 variable "httproute_hostname" {
   description = "HTTPRoute 访问域名"
   type        = string
-  default     = "speedtest.example.com"
 }
 
 variable "gateway_name" {

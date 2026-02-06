@@ -3,8 +3,8 @@ resource "helm_release" "nginx_gateway_fabric" {
   name             = "nginx-gateway-fabric"
   repository       = "oci://ghcr.io/nginx/charts"
   chart            = "nginx-gateway-fabric"
-  version          = var.nginx_gateway_fabric_chart_version
-  namespace        = var.gateway_api_namespace
+  version          = "1.6.2"
+  namespace        = var.gateway_namespace
   create_namespace = true
 
   values = [
@@ -54,7 +54,7 @@ resource "kubernetes_manifest" "gateway" {
     kind       = "Gateway"
     metadata = {
       name      = var.gateway_name
-      namespace = var.gateway_api_namespace
+      namespace = var.gateway_namespace
     }
     spec = {
       gatewayClassName = "nginx"

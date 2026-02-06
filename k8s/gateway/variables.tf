@@ -1,13 +1,7 @@
-variable "gateway_api_namespace" {
+variable "gateway_namespace" {
   description = "Gateway API 命名空间"
   type        = string
   default     = "nginx-gateway"
-}
-
-variable "nginx_gateway_fabric_chart_version" {
-  description = "NGINX Gateway Fabric Helm Chart 版本"
-  type        = string
-  default     = "1.6.2"
 }
 
 variable "gateway_name" {

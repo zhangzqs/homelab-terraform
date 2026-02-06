@@ -18,8 +18,18 @@ resource "kubernetes_manifest" "httproute" {
       ]
       hostnames = var.httproute_hostnames // 访问域名列表，例如 ["speedtest.example.com"]
 
-      // 流量转发规则列表
-      rules = var.httproute_rules
+      // 流量转发规则列表，自动填充 backendRefs.name 为内部创建的 Service 名称
+      rules = [
+        for rule in var.httproute_rules : {
+          matches = rule.matches
+          backendRefs = [
+            for backendRef in rule.backendRefs : {
+              name = local.svc_name
+              port = backendRef.port
+            }
+          ]
+        }
+      ]
     }
   }
 

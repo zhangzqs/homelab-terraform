@@ -1,5 +1,5 @@
-module "gateway_api" {
-  source = "../gateway_api"
+module "gateway" {
+  source = "../gateway"
 
   providers = {
     helm       = helm
@@ -8,42 +8,24 @@ module "gateway_api" {
 }
 
 module "speedtest" {
-  source = "../common_simple_app"
+  source = "../speedtest"
 
   providers = {
     kubernetes = kubernetes
   }
 
-  app_name        = "speedtest"
-  namespace       = "speedtest"
-  container_image = "ghcr.io/librespeed/speedtest:5.4.1"
-
-  container_ports = [
-    {
-      name           = "http"
-      container_port = 80
-      protocol       = "TCP"
-    }
-  ]
-
-  service_ports = [
-    {
-      name        = "http"
-      port        = 80
-      target_port = 80
-      protocol    = "TCP"
-    }
-  ]
+  httproute_hostname = "speedtest.example.com"
+  gateway_name       = module.gateway.gateway_name
+  gateway_namespace  = module.gateway.gateway_namespace
 }
 
 module "plantuml" {
   source = "../plantuml"
-
-  plantuml_enable_httproute = true
-  gateway_name              = module.gateway_api.gateway_name
-  gateway_namespace         = module.gateway_api.gateway_api_namespace
-
   providers = {
     kubernetes = kubernetes
   }
+
+  httproute_hostname = "plantuml.example.com"
+  gateway_name       = module.gateway.gateway_name
+  gateway_namespace  = module.gateway.gateway_namespace
 }
