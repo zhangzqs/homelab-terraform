@@ -91,6 +91,25 @@ resource "kubernetes_deployment_v1" "deployment" {
               failure_threshold     = var.readiness_probe.failure_threshold
             }
           }
+
+          dynamic "volume_mount" {
+            for_each = var.persistent_volumes
+            content {
+              name       = volume_mount.value.name
+              mount_path = volume_mount.value.mount_path
+            }
+          }
+        }
+
+        dynamic "volume" {
+          for_each = var.persistent_volumes
+          content {
+            name = volume.value.name
+
+            persistent_volume_claim {
+              claim_name = "${local.app_name}-${volume.value.name}"
+            }
+          }
         }
       }
     }

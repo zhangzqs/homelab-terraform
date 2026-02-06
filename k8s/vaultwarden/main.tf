@@ -5,7 +5,7 @@ module "vaultwarden" {
     kubernetes = kubernetes
   }
 
-  app_name        = "vaultwarden"
+  app_name        = 
   namespace       = "vaultwarden"
   container_image = "vaultwarden/server:1.35.2"
 
@@ -23,6 +23,14 @@ module "vaultwarden" {
       port        = 80
       target_port = 80
       protocol    = "TCP"
+    }
+  ]
+
+  persistent_volumes = [
+    {
+      name         = "data"
+      mount_path   = "/data"
+      storage_size = "5Gi"
     }
   ]
 

@@ -195,3 +195,15 @@ variable "gateway_namespace" {
     error_message = "如果启用 HTTPRoute，则必须提供 Gateway 所在命名空间"
   }
 }
+
+variable "persistent_volumes" {
+  description = "持久化卷配置列表"
+  type = list(object({
+    name          = string // 挂载的 volume 名称
+    mount_path    = string // 容器内挂载路径
+    storage_size  = optional(string, "1Gi") // 存储大小，默认为 1Gi
+    storage_class = optional(string, null)
+    access_modes  = optional(list(string), ["ReadWriteOnce"]) // 可被单节点读写挂载
+  }))
+  default = []
+}
