@@ -1,5 +1,5 @@
 module "gateway_api" {
-  source = "../gateway-api"
+  source = "../gateway_api"
 
   providers = {
     helm       = helm
@@ -7,7 +7,7 @@ module "gateway_api" {
   }
 }
 
-module "speedtest_test" {
+module "speedtest" {
   source = "../common_simple_app"
 
   providers = {
