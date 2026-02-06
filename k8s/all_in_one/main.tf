@@ -29,3 +29,15 @@ module "plantuml" {
   gateway_name       = module.gateway.gateway_name
   gateway_namespace  = module.gateway.gateway_namespace
 }
+
+module "vaultwarden" {
+  source = "../vaultwarden"
+
+  providers = {
+    kubernetes = kubernetes
+  }
+
+  httproute_hostname = "vaultwarden.example.com"
+  gateway_name       = module.gateway.gateway_name
+  gateway_namespace  = module.gateway.gateway_namespace
+}
