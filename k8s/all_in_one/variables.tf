@@ -17,3 +17,8 @@ variable "k8s_client_certificate" {
   description = "Kubernetes 客户端证书内容, users.user.client-key-data 字段的值"
   type        = string
 }
+
+variable "httproute_base_hostname" {
+  description = "HTTPRoute 基础访问域名，用于构建各服务的完整访问域名"
+  type        = string
+}

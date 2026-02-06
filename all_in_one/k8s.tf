@@ -8,4 +8,6 @@ module "k8s" {
   k8s_cluster_ca_certificate = module.pve_vm_k3s_master.k8s_cluster_ca_certificate
   k8s_client_key             = module.pve_vm_k3s_master.k8s_client_key
   k8s_client_certificate     = module.pve_vm_k3s_master.k8s_client_certificate
+
+  httproute_base_hostname = var.home_base_domain
 }

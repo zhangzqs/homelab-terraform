@@ -3,7 +3,15 @@ module "nginx_config" {
 
   working_dir = "/root/nginx"
 
-  services = {
+  shared_upstreams = {
+    k8s-httproute = {
+      servers = [
+        { address = "${local.pve_ipv4_address_vm_k3s_master}:80" }
+      ]
+    }
+  }
+
+  services = merge({
     pve = {
       upstream_inline = {
         servers = [
@@ -40,7 +48,21 @@ module "nginx_config" {
         }
       ]
     }
-  }
+    }, { // 各个k8s内的服务
+    for name, config in toset(module.k8s.service_name_list) :
+    name => {
+      upstream_ref = "k8s-httproute"
+      domains = [
+        {
+          domain              = "${name}.${var.home_base_domain}"
+          http_enabled        = false
+          https_enabled       = true
+          ssl_certificate     = "/root/nginx/ssl/home_base_domain.crt"
+          ssl_certificate_key = "/root/nginx/ssl/home_base_domain.key"
+        }
+      ]
+    }
+  })
 }
 
 module "pve_lxc_instance_nginx" {

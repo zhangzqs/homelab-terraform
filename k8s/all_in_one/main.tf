@@ -14,7 +14,7 @@ module "speedtest" {
     kubernetes = kubernetes
   }
 
-  httproute_hostname = "speedtest.example.com"
+  httproute_hostname = "speedtest.${var.httproute_base_hostname}"
   gateway_name       = module.gateway.gateway_name
   gateway_namespace  = module.gateway.gateway_namespace
 }
@@ -25,7 +25,7 @@ module "plantuml" {
     kubernetes = kubernetes
   }
 
-  httproute_hostname = "plantuml.example.com"
+  httproute_hostname = "plantuml.${var.httproute_base_hostname}"
   gateway_name       = module.gateway.gateway_name
   gateway_namespace  = module.gateway.gateway_namespace
 }
@@ -37,7 +37,7 @@ module "vaultwarden" {
     kubernetes = kubernetes
   }
 
-  httproute_hostname = "vaultwarden.example.com"
+  httproute_hostname = "vaultwarden.${var.httproute_base_hostname}"
   gateway_name       = module.gateway.gateway_name
   gateway_namespace  = module.gateway.gateway_namespace
 }
