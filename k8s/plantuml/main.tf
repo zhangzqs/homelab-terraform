@@ -37,7 +37,7 @@ module "plantuml" {
   gateway_namespace = var.gateway_namespace
 
   liveness_probe = {
-    enabled = true
+    enabled               = true
     path                  = "/"
     port                  = 8080
     initial_delay_seconds = 30
@@ -47,7 +47,7 @@ module "plantuml" {
   }
 
   readiness_probe = {
-    enabled = true
+    enabled               = true
     path                  = "/"
     port                  = 8080
     initial_delay_seconds = 30
