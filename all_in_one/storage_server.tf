@@ -1,3 +1,29 @@
+variable "pve_host_ssh_params" {
+  type = object({
+    ssh_host     = string
+    ssh_port     = optional(number, 22)
+    ssh_user     = optional(string, "root")
+    ssh_password = string
+  })
+  description = "Proxmox VE 主机的 SSH 连接参数"
+}
+
+module "auto_disk_mount" {
+  source       = "../utils/auto_disk_mount"
+  ssh_host     = var.pve_host_ssh_params.ssh_host
+  ssh_port     = var.pve_host_ssh_params.ssh_port
+  ssh_user     = var.pve_host_ssh_params.ssh_user
+  ssh_password = var.pve_host_ssh_params.ssh_password
+
+  disk_uuid         = var.hdd_disk_uuid # 替换为实际的UUID（使用 blkid 命令查看）
+  disk_label        = "hdd-disk"
+  mount_point       = "/mnt/hdd-disk"
+  filesystem_type   = "ext4"
+  mount_options     = "defaults,nofail" // 开机自动挂载，磁盘不可用时不影响系统启动
+  automount_enabled = true              // 启用按需挂载
+  automount_timeout = 300               // 秒，0表示永不超时卸载
+}
+
 module "pve_lxc_instance_storage_server" {
   source = "../pve/lxcs/storage_server"
 
@@ -15,31 +41,37 @@ module "pve_lxc_instance_storage_server" {
 
   nfs_exports = [
     {
-      name = "test"
-      path = "/root/test_nfs"
+      name = "k8s_volumes"
+      path = local.k8s_volumes_nfs_path
     },
   ]
 
   host_mount_points = [
     {
-      host_path      = "/root/share"
-      container_path = "/root/share"
-    },
+      host_path      = module.auto_disk_mount.mount_point
+      container_path = "/mnt/host_hdd_disk"
+    }
   ]
-
-  smb_shares = [
-    {
-      name        = "test"
-      path        = "/root/test_smb"
-      valid_users = ["storageuser"]
-      guest_ok    = false
-      read_only   = false
-    },
-  ]
-
   providers = {
     proxmox = proxmox
   }
+}
+
+module "pvc_lxc_mount_point_storage_server" {
+  source = "../utils/lxc_mount_point"
+  depends_on = [
+    module.pve_lxc_instance_storage_server
+  ]
+
+  ssh_host     = var.pve_host_ssh_params.ssh_host
+  ssh_port     = var.pve_host_ssh_params.ssh_port
+  ssh_user     = var.pve_host_ssh_params.ssh_user
+  ssh_password = var.pve_host_ssh_params.ssh_password
+
+  container_id   = local.pve_vm_id_lxc_storage_server
+  mount_point_id = "mp0"
+  host_path      = module.auto_disk_mount.mount_point
+  container_path = "/mnt/host_hdd_disk"
 }
 
 output "pve_lxc_storage_server_ipv4_address" {

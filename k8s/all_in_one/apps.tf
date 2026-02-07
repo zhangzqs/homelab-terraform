@@ -22,6 +22,7 @@ module "plantuml" {
 }
 
 module "vaultwarden" {
+  count  = 1
   source = "../apps/vaultwarden"
 
   providers = {

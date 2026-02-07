@@ -156,7 +156,7 @@ locals {
   # 生成 NFS 目录创建命令（跳过已挂载的目录）
   nfs_mkdir_commands = [
     for export in var.nfs_exports :
-    "if ! mountpoint -q ${export.path} 2>/dev/null; then mkdir -p ${export.path} && chmod 777 ${export.path}; fi"
+    "if ! mountpoint -q ${export.path} 2>/dev/null; then mkdir -p ${export.path} && chmod 755 ${export.path}; fi"
     if !contains(local.mounted_paths, export.path)
   ]
 
@@ -170,7 +170,7 @@ locals {
   # 生成 SMB 目录创建命令（跳过已挂载的目录）
   smb_mkdir_commands = [
     for share in var.smb_shares :
-    "if ! mountpoint -q ${share.path} 2>/dev/null; then mkdir -p ${share.path} && chmod 777 ${share.path}; fi"
+    "if ! mountpoint -q ${share.path} 2>/dev/null; then mkdir -p ${share.path} && chmod 755 ${share.path}; fi"
     if !contains(local.mounted_paths, share.path)
   ]
 }

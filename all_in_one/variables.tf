@@ -86,3 +86,8 @@ variable "code_server_password" {
   type        = string
   sensitive   = true
 }
+
+variable "hdd_disk_uuid" {
+  description = "HDD磁盘的UUID，用于自动挂载"
+  type        = string
+}

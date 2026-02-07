@@ -1,0 +1,19 @@
+# Terraform 文件
+*.tfstate
+*.tfstate.*
+*.tfvars
+!examples.tf
+.terraform/
+.terraform.lock.hcl
+
+# IDE 文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 临时文件
+*.log
+*.backup
+.DS_Store
