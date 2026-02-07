@@ -32,7 +32,7 @@ output "management_commands" {
     restart = "systemctl restart ${local.automount_unit_name}"
     enable  = "systemctl enable ${local.automount_unit_name}"
     disable = "systemctl disable ${local.automount_unit_name}"
-  } : {
+    } : {
     status  = "systemctl status ${local.mount_unit_name}"
     start   = "systemctl start ${local.mount_unit_name}"
     stop    = "systemctl stop ${local.mount_unit_name}"
