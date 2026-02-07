@@ -8,7 +8,8 @@ module "mihomo_proxy_config" {
 }
 
 module "pve_lxc_instance_mihomo" {
-  source = "../pve/lxcs/mihomo_proxy"
+  depends_on = [module.mihomo_proxy_config]
+  source     = "../pve/lxcs/mihomo_proxy"
 
   pve_node_name = local.pve_node_name
 
