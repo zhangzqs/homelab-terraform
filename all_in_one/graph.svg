@@ -36,8 +36,8 @@
 </g>
 <g id="clust6" class="cluster">
 <title>cluster_module.k8s.module.nfs_csi</title>
-<polygon fill="none" stroke="black" points="2525.5,-1299 2525.5,-1374 2748.5,-1374 2748.5,-1299 2525.5,-1299"/>
-<text text-anchor="middle" x="2637" y="-1358.8" font-family="sans-serif" font-size="14.00">module.k8s.module.nfs_csi</text>
+<polygon fill="none" stroke="black" points="2525.5,-1345 2525.5,-1420 2748.5,-1420 2748.5,-1345 2525.5,-1345"/>
+<text text-anchor="middle" x="2637" y="-1404.8" font-family="sans-serif" font-size="14.00">module.k8s.module.nfs_csi</text>
 </g>
 <g id="clust7" class="cluster">
 <title>cluster_module.k8s.module.nfs_storage_class</title>
@@ -61,8 +61,8 @@
 </g>
 <g id="clust11" class="cluster">
 <title>cluster_module.mihomo_proxy_config</title>
-<polygon fill="none" stroke="black" points="3461,-2070 3461,-2145 3750,-2145 3750,-2070 3461,-2070"/>
-<text text-anchor="middle" x="3605.5" y="-2129.8" font-family="sans-serif" font-size="14.00">module.mihomo_proxy_config</text>
+<polygon fill="none" stroke="black" points="410.5,-444 410.5,-519 699.5,-519 699.5,-444 410.5,-444"/>
+<text text-anchor="middle" x="555" y="-503.8" font-family="sans-serif" font-size="14.00">module.mihomo_proxy_config</text>
 </g>
 <g id="clust12" class="cluster">
 <title>cluster_module.pvc_lxc_mount_point_storage_server</title>
@@ -308,14 +308,14 @@
 <!-- module.k8s.module.nfs_csi.helm_release.csi_driver_nfs -->
 <g id="node16" class="node">
 <title>module.k8s.module.nfs_csi.helm_release.csi_driver_nfs</title>
-<polygon fill="none" stroke="black" points="2740.5,-1343 2533.5,-1343 2533.5,-1307 2740.5,-1307 2740.5,-1343"/>
-<text text-anchor="middle" x="2637" y="-1321.3" font-family="sans-serif" font-size="14.00">helm_release.csi_driver_nfs</text>
+<polygon fill="none" stroke="black" points="2740.5,-1389 2533.5,-1389 2533.5,-1353 2740.5,-1353 2740.5,-1389"/>
+<text text-anchor="middle" x="2637" y="-1367.3" font-family="sans-serif" font-size="14.00">helm_release.csi_driver_nfs</text>
 </g>
 <!-- module.k8s.module.nfs_csi.helm_release.csi_driver_nfs&#45;&gt;module.pve_vm_k3s_master.data.external.kubeconfig -->
 <g id="edge16" class="edge">
 <title>module.k8s.module.nfs_csi.helm_release.csi_driver_nfs&#45;&gt;module.pve_vm_k3s_master.data.external.kubeconfig</title>
-<path fill="none" stroke="black" d="M2612.71,-1343.07C2578.33,-1370.72 2513.71,-1426.62 2473,-1486 2378.23,-1624.24 2314.83,-1818.1 2293.47,-1889.34"/>
-<polygon fill="black" stroke="black" points="2290.11,-1888.36 2290.63,-1898.94 2296.83,-1890.35 2290.11,-1888.36"/>
+<path fill="none" stroke="black" d="M2599.53,-1389.08C2563.26,-1408.64 2508.1,-1442.9 2473,-1486 2366.93,-1616.27 2310.2,-1815.76 2292.05,-1888.88"/>
+<polygon fill="black" stroke="black" points="2288.62,-1888.19 2289.65,-1898.73 2295.42,-1889.84 2288.62,-1888.19"/>
 </g>
 <!-- module.k8s.module.nfs_storage_class.kubernetes_storage_class_v1.storage_class -->
 <g id="node17" class="node">
@@ -326,8 +326,8 @@
 <!-- module.k8s.module.nfs_storage_class.kubernetes_storage_class_v1.storage_class&#45;&gt;module.k8s.module.nfs_csi.helm_release.csi_driver_nfs -->
 <g id="edge17" class="edge">
 <title>module.k8s.module.nfs_storage_class.kubernetes_storage_class_v1.storage_class&#45;&gt;module.k8s.module.nfs_csi.helm_release.csi_driver_nfs</title>
-<path fill="none" stroke="black" d="M2953.34,-1281.02C2889.23,-1289.96 2812.52,-1300.66 2750.81,-1309.26"/>
-<polygon fill="black" stroke="black" points="2750.07,-1305.83 2740.65,-1310.68 2751.04,-1312.77 2750.07,-1305.83"/>
+<path fill="none" stroke="black" d="M2987.92,-1281.04C2940.09,-1290.6 2881.26,-1303.03 2829,-1316 2788.13,-1326.14 2742.83,-1339.11 2706.6,-1349.91"/>
+<polygon fill="black" stroke="black" points="2705.21,-1346.67 2696.64,-1352.89 2707.22,-1353.38 2705.21,-1346.67"/>
 </g>
 <!-- module.k8s.module.plantuml.module.plantuml.kubernetes_deployment_v1.deployment -->
 <g id="node18" class="node">
@@ -494,7 +494,7 @@
 <!-- module.k8s.module.vaultwarden.module.app.kubernetes_manifest.httproute&#45;&gt;module.k8s.module.gateway.helm_release.nginx_gateway_fabric -->
 <g id="edge32" class="edge">
 <title>module.k8s.module.vaultwarden.module.app.kubernetes_manifest.httproute&#45;&gt;module.k8s.module.gateway.helm_release.nginx_gateway_fabric</title>
-<path fill="none" stroke="black" d="M3594.74,-1526.17C3558.36,-1594.68 3429.53,-1844.74 3366,-2066 3351.72,-2115.72 3368.18,-2261.09 3330,-2296 3288.83,-2333.64 2884.49,-2323.26 2829,-2329 2808.44,-2331.13 2786.69,-2333.8 2765.52,-2336.63"/>
+<path fill="none" stroke="black" d="M3604.79,-1526.06C3605.31,-1624.1 3593.67,-2095.27 3330,-2296 3285.61,-2329.79 2884.49,-2323.26 2829,-2329 2808.44,-2331.13 2786.69,-2333.8 2765.52,-2336.63"/>
 <polygon fill="black" stroke="black" points="2764.95,-2333.17 2755.51,-2337.98 2765.89,-2340.11 2764.95,-2333.17"/>
 </g>
 <!-- module.k8s.module.vaultwarden.module.app.kubernetes_manifest.httproute&#45;&gt;module.k8s.module.vaultwarden.module.app.kubernetes_namespace_v1.namespace -->
@@ -542,8 +542,8 @@
 <!-- module.mihomo_proxy_config.null_resource.validate_proxy_sources -->
 <g id="node33" class="node">
 <title>module.mihomo_proxy_config.null_resource.validate_proxy_sources</title>
-<polygon fill="none" stroke="black" points="3742,-2114 3469,-2114 3469,-2078 3742,-2078 3742,-2114"/>
-<text text-anchor="middle" x="3605.5" y="-2092.3" font-family="sans-serif" font-size="14.00">null_resource.validate_proxy_sources</text>
+<polygon fill="none" stroke="black" points="691.5,-488 418.5,-488 418.5,-452 691.5,-452 691.5,-488"/>
+<text text-anchor="middle" x="555" y="-466.3" font-family="sans-serif" font-size="14.00">null_resource.validate_proxy_sources</text>
 </g>
 <!-- module.pvc_lxc_mount_point_storage_server.null_resource.lxc_mount_point -->
 <g id="node34" class="node">
@@ -866,44 +866,62 @@
 <!-- module.pve_lxc_instance_mihomo.random_password.container_password -->
 <g id="node59" class="node">
 <title>module.pve_lxc_instance_mihomo.random_password.container_password</title>
-<polygon fill="none" stroke="black" points="1172.5,-542 886.5,-542 886.5,-506 1172.5,-506 1172.5,-542"/>
-<text text-anchor="middle" x="1029.5" y="-520.3" font-family="sans-serif" font-size="14.00">random_password.container_password</text>
+<polygon fill="none" stroke="black" points="1172.5,-488 886.5,-488 886.5,-452 1172.5,-452 1172.5,-488"/>
+<text text-anchor="middle" x="1029.5" y="-466.3" font-family="sans-serif" font-size="14.00">random_password.container_password</text>
 </g>
 <!-- module.pve_lxc_instance_mihomo.proxmox_virtual_environment_container.mihomo_proxy_container&#45;&gt;module.pve_lxc_instance_mihomo.random_password.container_password -->
 <g id="edge62" class="edge">
 <title>module.pve_lxc_instance_mihomo.proxmox_virtual_environment_container.mihomo_proxy_container&#45;&gt;module.pve_lxc_instance_mihomo.random_password.container_password</title>
-<path fill="none" stroke="black" d="M1243.35,-511.17C1222.84,-512.41 1202.46,-513.64 1182.89,-514.82"/>
-<polygon fill="black" stroke="black" points="1182.5,-511.33 1172.73,-515.43 1182.93,-518.32 1182.5,-511.33"/>
+<path fill="none" stroke="black" d="M1243.35,-482.83C1222.84,-481.59 1202.46,-480.36 1182.89,-479.18"/>
+<polygon fill="black" stroke="black" points="1182.93,-475.68 1172.73,-478.57 1182.5,-482.67 1182.93,-475.68"/>
 </g>
 <!-- module.pve_lxc_instance_mihomo.terraform_data.container_replacer -->
 <g id="node60" class="node">
 <title>module.pve_lxc_instance_mihomo.terraform_data.container_replacer</title>
-<polygon fill="none" stroke="black" points="1155.5,-434 903.5,-434 903.5,-398 1155.5,-398 1155.5,-434"/>
-<text text-anchor="middle" x="1029.5" y="-412.3" font-family="sans-serif" font-size="14.00">terraform_data.container_replacer</text>
+<polygon fill="none" stroke="black" points="1155.5,-542 903.5,-542 903.5,-506 1155.5,-506 1155.5,-542"/>
+<text text-anchor="middle" x="1029.5" y="-520.3" font-family="sans-serif" font-size="14.00">terraform_data.container_replacer</text>
 </g>
 <!-- module.pve_lxc_instance_mihomo.proxmox_virtual_environment_container.mihomo_proxy_container&#45;&gt;module.pve_lxc_instance_mihomo.terraform_data.container_replacer -->
 <g id="edge63" class="edge">
 <title>module.pve_lxc_instance_mihomo.proxmox_virtual_environment_container.mihomo_proxy_container&#45;&gt;module.pve_lxc_instance_mihomo.terraform_data.container_replacer</title>
-<path fill="none" stroke="black" d="M1396.54,-478.95C1344.65,-467.84 1276.06,-453.72 1215,-443 1199.16,-440.22 1182.51,-437.5 1165.98,-434.93"/>
-<polygon fill="black" stroke="black" points="1166.12,-431.41 1155.7,-433.34 1165.05,-438.33 1166.12,-431.41"/>
+<path fill="none" stroke="black" d="M1243.35,-511.17C1216.8,-512.77 1190.46,-514.36 1165.82,-515.84"/>
+<polygon fill="black" stroke="black" points="1165.51,-512.36 1155.74,-516.45 1165.93,-519.34 1165.51,-512.36"/>
 </g>
 <!-- module.pve_lxc_instance_mihomo.tls_private_key.container_key -->
 <g id="node61" class="node">
 <title>module.pve_lxc_instance_mihomo.tls_private_key.container_key</title>
-<polygon fill="none" stroke="black" points="1138.5,-488 920.5,-488 920.5,-452 1138.5,-452 1138.5,-488"/>
-<text text-anchor="middle" x="1029.5" y="-466.3" font-family="sans-serif" font-size="14.00">tls_private_key.container_key</text>
+<polygon fill="none" stroke="black" points="1138.5,-434 920.5,-434 920.5,-398 1138.5,-398 1138.5,-434"/>
+<text text-anchor="middle" x="1029.5" y="-412.3" font-family="sans-serif" font-size="14.00">tls_private_key.container_key</text>
 </g>
 <!-- module.pve_lxc_instance_mihomo.proxmox_virtual_environment_container.mihomo_proxy_container&#45;&gt;module.pve_lxc_instance_mihomo.tls_private_key.container_key -->
 <g id="edge64" class="edge">
 <title>module.pve_lxc_instance_mihomo.proxmox_virtual_environment_container.mihomo_proxy_container&#45;&gt;module.pve_lxc_instance_mihomo.tls_private_key.container_key</title>
-<path fill="none" stroke="black" d="M1243.35,-482.83C1210.56,-480.85 1178.09,-478.9 1148.76,-477.13"/>
-<polygon fill="black" stroke="black" points="1148.72,-473.62 1138.53,-476.51 1148.3,-480.61 1148.72,-473.62"/>
+<path fill="none" stroke="black" d="M1396.54,-478.95C1344.65,-467.84 1276.06,-453.72 1215,-443 1193.71,-439.26 1170.97,-435.64 1148.99,-432.32"/>
+<polygon fill="black" stroke="black" points="1149.36,-428.84 1138.96,-430.82 1148.33,-435.76 1149.36,-428.84"/>
 </g>
 <!-- module.pve_lxc_instance_mihomo.proxmox_virtual_environment_container.mihomo_proxy_container&#45;&gt;module.pve_lxc_templates.proxmox_virtual_environment_file.ubuntu_24_04 -->
 <g id="edge65" class="edge">
 <title>module.pve_lxc_instance_mihomo.proxmox_virtual_environment_container.mihomo_proxy_container&#45;&gt;module.pve_lxc_templates.proxmox_virtual_environment_file.ubuntu_24_04</title>
 <path fill="none" stroke="black" d="M1426.56,-515.02C1373.82,-532.78 1289.51,-559.71 1215,-577 1199.01,-580.71 1182.14,-584.12 1165.36,-587.22"/>
 <polygon fill="black" stroke="black" points="1164.71,-583.78 1155.5,-589 1165.96,-590.66 1164.71,-583.78"/>
+</g>
+<!-- module.pve_lxc_instance_mihomo.random_password.container_password&#45;&gt;module.mihomo_proxy_config.null_resource.validate_proxy_sources -->
+<g id="edge66" class="edge">
+<title>module.pve_lxc_instance_mihomo.random_password.container_password&#45;&gt;module.mihomo_proxy_config.null_resource.validate_proxy_sources</title>
+<path fill="none" stroke="black" d="M886.41,-470C828.09,-470 760.62,-470 701.91,-470"/>
+<polygon fill="black" stroke="black" points="701.81,-466.5 691.81,-470 701.81,-473.5 701.81,-466.5"/>
+</g>
+<!-- module.pve_lxc_instance_mihomo.terraform_data.container_replacer&#45;&gt;module.mihomo_proxy_config.null_resource.validate_proxy_sources -->
+<g id="edge67" class="edge">
+<title>module.pve_lxc_instance_mihomo.terraform_data.container_replacer&#45;&gt;module.mihomo_proxy_config.null_resource.validate_proxy_sources</title>
+<path fill="none" stroke="black" d="M903.43,-509.71C841.53,-502.63 766.45,-494.05 701.94,-486.68"/>
+<polygon fill="black" stroke="black" points="702.01,-483.16 691.68,-485.51 701.22,-490.12 702.01,-483.16"/>
+</g>
+<!-- module.pve_lxc_instance_mihomo.tls_private_key.container_key&#45;&gt;module.mihomo_proxy_config.null_resource.validate_proxy_sources -->
+<g id="edge68" class="edge">
+<title>module.pve_lxc_instance_mihomo.tls_private_key.container_key&#45;&gt;module.mihomo_proxy_config.null_resource.validate_proxy_sources</title>
+<path fill="none" stroke="black" d="M920.4,-428.35C855.61,-435.76 772.4,-445.27 701.85,-453.33"/>
+<polygon fill="black" stroke="black" points="701.08,-449.9 691.54,-454.51 701.87,-456.85 701.08,-449.9"/>
 </g>
 <!-- module.pve_lxc_instance_nginx.null_resource.deploy_nginx_configs -->
 <g id="node62" class="node">
@@ -912,7 +930,7 @@
 <text text-anchor="middle" x="2637" y="-1169.3" font-family="sans-serif" font-size="14.00">null_resource.deploy_nginx_configs</text>
 </g>
 <!-- module.pve_lxc_instance_nginx.null_resource.deploy_nginx_configs&#45;&gt;module.acme_certs.acme_certificate.certificate -->
-<g id="edge66" class="edge">
+<g id="edge69" class="edge">
 <title>module.pve_lxc_instance_nginx.null_resource.deploy_nginx_configs&#45;&gt;module.acme_certs.acme_certificate.certificate</title>
 <path fill="none" stroke="black" d="M2581.07,-1191.13C2541.33,-1203.87 2486.2,-1220.74 2437,-1233 2423.15,-1236.45 2408.52,-1239.76 2394.02,-1242.84"/>
 <polygon fill="black" stroke="black" points="2393.08,-1239.46 2384.01,-1244.94 2394.52,-1246.31 2393.08,-1239.46"/>
@@ -924,7 +942,7 @@
 <text text-anchor="middle" x="2284.5" y="-1162.3" font-family="sans-serif" font-size="14.00">null_resource.setup_systemd_service</text>
 </g>
 <!-- module.pve_lxc_instance_nginx.null_resource.deploy_nginx_configs&#45;&gt;module.pve_lxc_instance_nginx.null_resource.setup_systemd_service -->
-<g id="edge67" class="edge">
+<g id="edge70" class="edge">
 <title>module.pve_lxc_instance_nginx.null_resource.deploy_nginx_configs&#45;&gt;module.pve_lxc_instance_nginx.null_resource.setup_systemd_service</title>
 <path fill="none" stroke="black" d="M2505.98,-1170.4C2481.84,-1169.92 2456.47,-1169.41 2431.88,-1168.92"/>
 <polygon fill="black" stroke="black" points="2431.83,-1165.42 2421.76,-1168.72 2431.69,-1172.42 2431.83,-1165.42"/>
@@ -936,7 +954,7 @@
 <text text-anchor="middle" x="3083.5" y="-1169.3" font-family="sans-serif" font-size="14.00">null_resource.restart_nginx</text>
 </g>
 <!-- module.pve_lxc_instance_nginx.null_resource.restart_nginx&#45;&gt;module.pve_lxc_instance_nginx.null_resource.deploy_nginx_configs -->
-<g id="edge68" class="edge">
+<g id="edge71" class="edge">
 <title>module.pve_lxc_instance_nginx.null_resource.restart_nginx&#45;&gt;module.pve_lxc_instance_nginx.null_resource.deploy_nginx_configs</title>
 <path fill="none" stroke="black" d="M2981.36,-1173C2921.29,-1173 2844.23,-1173 2778.34,-1173"/>
 <polygon fill="black" stroke="black" points="2778.29,-1169.5 2768.29,-1173 2778.29,-1176.5 2778.29,-1169.5"/>
@@ -954,13 +972,13 @@
 <text text-anchor="middle" x="1479.5" y="-1122.3" font-family="sans-serif" font-size="14.00">proxmox_virtual_environment_container.nginx_container</text>
 </g>
 <!-- module.pve_lxc_instance_nginx.null_resource.setup_nginx&#45;&gt;module.pve_lxc_instance_nginx.proxmox_virtual_environment_container.nginx_container -->
-<g id="edge69" class="edge">
+<g id="edge72" class="edge">
 <title>module.pve_lxc_instance_nginx.null_resource.setup_nginx&#45;&gt;module.pve_lxc_instance_nginx.proxmox_virtual_environment_container.nginx_container</title>
 <path fill="none" stroke="black" d="M1825.34,-1147.04C1786.46,-1144.67 1740.07,-1141.84 1694.12,-1139.03"/>
 <polygon fill="black" stroke="black" points="1694.21,-1135.53 1684.02,-1138.42 1693.79,-1142.52 1694.21,-1135.53"/>
 </g>
 <!-- module.pve_lxc_instance_nginx.null_resource.setup_systemd_service&#45;&gt;module.pve_lxc_instance_nginx.null_resource.setup_nginx -->
-<g id="edge70" class="edge">
+<g id="edge73" class="edge">
 <title>module.pve_lxc_instance_nginx.null_resource.setup_systemd_service&#45;&gt;module.pve_lxc_instance_nginx.null_resource.setup_nginx</title>
 <path fill="none" stroke="black" d="M2147.46,-1161.07C2109.52,-1159.69 2068.85,-1158.22 2032.79,-1156.91"/>
 <polygon fill="black" stroke="black" points="2032.86,-1153.41 2022.74,-1156.54 2032.61,-1160.4 2032.86,-1153.41"/>
@@ -972,7 +990,7 @@
 <text text-anchor="middle" x="1029.5" y="-1176.3" font-family="sans-serif" font-size="14.00">random_password.container_password</text>
 </g>
 <!-- module.pve_lxc_instance_nginx.proxmox_virtual_environment_container.nginx_container&#45;&gt;module.pve_lxc_instance_nginx.random_password.container_password -->
-<g id="edge71" class="edge">
+<g id="edge74" class="edge">
 <title>module.pve_lxc_instance_nginx.proxmox_virtual_environment_container.nginx_container&#45;&gt;module.pve_lxc_instance_nginx.random_password.container_password</title>
 <path fill="none" stroke="black" d="M1329.01,-1144.02C1281.97,-1149.69 1229.99,-1155.95 1182.77,-1161.65"/>
 <polygon fill="black" stroke="black" points="1182.27,-1158.18 1172.76,-1162.85 1183.11,-1165.13 1182.27,-1158.18"/>
@@ -984,7 +1002,7 @@
 <text text-anchor="middle" x="1029.5" y="-1068.3" font-family="sans-serif" font-size="14.00">terraform_data.container_replacer</text>
 </g>
 <!-- module.pve_lxc_instance_nginx.proxmox_virtual_environment_container.nginx_container&#45;&gt;module.pve_lxc_instance_nginx.terraform_data.container_replacer -->
-<g id="edge72" class="edge">
+<g id="edge75" class="edge">
 <title>module.pve_lxc_instance_nginx.proxmox_virtual_environment_container.nginx_container&#45;&gt;module.pve_lxc_instance_nginx.terraform_data.container_replacer</title>
 <path fill="none" stroke="black" d="M1329.01,-1107.98C1276.29,-1101.63 1217.36,-1094.52 1165.87,-1088.32"/>
 <polygon fill="black" stroke="black" points="1166.02,-1084.81 1155.68,-1087.09 1165.19,-1091.76 1166.02,-1084.81"/>
@@ -996,13 +1014,13 @@
 <text text-anchor="middle" x="1029.5" y="-1122.3" font-family="sans-serif" font-size="14.00">tls_private_key.container_key</text>
 </g>
 <!-- module.pve_lxc_instance_nginx.proxmox_virtual_environment_container.nginx_container&#45;&gt;module.pve_lxc_instance_nginx.tls_private_key.container_key -->
-<g id="edge73" class="edge">
+<g id="edge76" class="edge">
 <title>module.pve_lxc_instance_nginx.proxmox_virtual_environment_container.nginx_container&#45;&gt;module.pve_lxc_instance_nginx.tls_private_key.container_key</title>
 <path fill="none" stroke="black" d="M1274.82,-1126C1231.75,-1126 1187.66,-1126 1149.01,-1126"/>
 <polygon fill="black" stroke="black" points="1148.78,-1122.5 1138.78,-1126 1148.78,-1129.5 1148.78,-1122.5"/>
 </g>
 <!-- module.pve_lxc_instance_nginx.proxmox_virtual_environment_container.nginx_container&#45;&gt;module.pve_lxc_templates.proxmox_virtual_environment_file.ubuntu_24_04 -->
-<g id="edge74" class="edge">
+<g id="edge77" class="edge">
 <title>module.pve_lxc_instance_nginx.proxmox_virtual_environment_container.nginx_container&#45;&gt;module.pve_lxc_templates.proxmox_virtual_environment_file.ubuntu_24_04</title>
 <path fill="none" stroke="black" d="M1348.94,-1108C1308.9,-1095.88 1268.64,-1075.68 1243,-1042 1191.44,-974.27 1268.66,-726.07 1215,-660 1204.47,-647.04 1191,-637.12 1176.14,-629.55"/>
 <polygon fill="black" stroke="black" points="1177.26,-626.21 1166.72,-625.14 1174.29,-632.55 1177.26,-626.21"/>
@@ -1014,13 +1032,13 @@
 <text text-anchor="middle" x="1924" y="-281.3" font-family="sans-serif" font-size="14.00">null_resource.setup_container</text>
 </g>
 <!-- module.pve_lxc_instance_storage_server.null_resource.configure_nfs&#45;&gt;module.pve_lxc_instance_storage_server.null_resource.setup_container -->
-<g id="edge75" class="edge">
+<g id="edge78" class="edge">
 <title>module.pve_lxc_instance_storage_server.null_resource.configure_nfs&#45;&gt;module.pve_lxc_instance_storage_server.null_resource.setup_container</title>
 <path fill="none" stroke="black" d="M2181.25,-317.88C2139.2,-312.48 2090.17,-306.19 2046.32,-300.57"/>
 <polygon fill="black" stroke="black" points="2046.54,-297.07 2036.18,-299.27 2045.65,-304.01 2046.54,-297.07"/>
 </g>
 <!-- module.pve_lxc_instance_storage_server.null_resource.configure_smb&#45;&gt;module.pve_lxc_instance_storage_server.null_resource.setup_container -->
-<g id="edge76" class="edge">
+<g id="edge79" class="edge">
 <title>module.pve_lxc_instance_storage_server.null_resource.configure_smb&#45;&gt;module.pve_lxc_instance_storage_server.null_resource.setup_container</title>
 <path fill="none" stroke="black" d="M2176.91,-279.38C2135.83,-280.3 2088.62,-281.35 2046.25,-282.29"/>
 <polygon fill="black" stroke="black" points="2046.08,-278.8 2036.16,-282.52 2046.23,-285.8 2046.08,-278.8"/>
@@ -1032,13 +1050,13 @@
 <text text-anchor="middle" x="1479.5" y="-277.3" font-family="sans-serif" font-size="14.00">proxmox_virtual_environment_container.storage_server_container</text>
 </g>
 <!-- module.pve_lxc_instance_storage_server.null_resource.setup_container&#45;&gt;module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container -->
-<g id="edge77" class="edge">
+<g id="edge80" class="edge">
 <title>module.pve_lxc_instance_storage_server.null_resource.setup_container&#45;&gt;module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container</title>
 <path fill="none" stroke="black" d="M1811.91,-284C1785.46,-283.76 1756.19,-283.49 1726.31,-283.22"/>
 <polygon fill="black" stroke="black" points="1726.19,-279.72 1716.16,-283.13 1726.13,-286.72 1726.19,-279.72"/>
 </g>
 <!-- module.pve_lxc_instance_storage_server.null_resource.storage_server_container_protect&#45;&gt;module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container -->
-<g id="edge78" class="edge">
+<g id="edge81" class="edge">
 <title>module.pve_lxc_instance_storage_server.null_resource.storage_server_container_protect&#45;&gt;module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container</title>
 <path fill="none" stroke="black" d="M1763.56,-249.02C1726.62,-253.19 1687.17,-257.65 1649.82,-261.87"/>
 <polygon fill="black" stroke="black" points="1649.4,-258.39 1639.86,-262.99 1650.19,-265.35 1649.4,-258.39"/>
@@ -1050,7 +1068,7 @@
 <text text-anchor="middle" x="1029.5" y="-329.3" font-family="sans-serif" font-size="14.00">random_password.container_password</text>
 </g>
 <!-- module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container&#45;&gt;module.pve_lxc_instance_storage_server.random_password.container_password -->
-<g id="edge79" class="edge">
+<g id="edge82" class="edge">
 <title>module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container&#45;&gt;module.pve_lxc_instance_storage_server.random_password.container_password</title>
 <path fill="none" stroke="black" d="M1323.38,-299C1277.9,-304.28 1228.22,-310.05 1182.91,-315.31"/>
 <polygon fill="black" stroke="black" points="1182.24,-311.86 1172.71,-316.49 1183.05,-318.82 1182.24,-311.86"/>
@@ -1062,7 +1080,7 @@
 <text text-anchor="middle" x="1029.5" y="-221.3" font-family="sans-serif" font-size="14.00">terraform_data.container_replacer</text>
 </g>
 <!-- module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container&#45;&gt;module.pve_lxc_instance_storage_server.terraform_data.container_replacer -->
-<g id="edge80" class="edge">
+<g id="edge83" class="edge">
 <title>module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container&#45;&gt;module.pve_lxc_instance_storage_server.terraform_data.container_replacer</title>
 <path fill="none" stroke="black" d="M1334.28,-262.97C1280.22,-256.21 1219.01,-248.56 1165.78,-241.91"/>
 <polygon fill="black" stroke="black" points="1165.95,-238.4 1155.6,-240.64 1165.08,-245.35 1165.95,-238.4"/>
@@ -1074,13 +1092,13 @@
 <text text-anchor="middle" x="1029.5" y="-275.3" font-family="sans-serif" font-size="14.00">tls_private_key.container_key</text>
 </g>
 <!-- module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container&#45;&gt;module.pve_lxc_instance_storage_server.tls_private_key.container_key -->
-<g id="edge81" class="edge">
+<g id="edge84" class="edge">
 <title>module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container&#45;&gt;module.pve_lxc_instance_storage_server.tls_private_key.container_key</title>
 <path fill="none" stroke="black" d="M1242.69,-279.95C1210.16,-279.8 1177.97,-279.66 1148.86,-279.53"/>
 <polygon fill="black" stroke="black" points="1148.72,-276.03 1138.7,-279.48 1148.68,-283.03 1148.72,-276.03"/>
 </g>
 <!-- module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container&#45;&gt;module.pve_lxc_templates.proxmox_virtual_environment_file.ubuntu_24_04 -->
-<g id="edge82" class="edge">
+<g id="edge85" class="edge">
 <title>module.pve_lxc_instance_storage_server.proxmox_virtual_environment_container.storage_server_container&#45;&gt;module.pve_lxc_templates.proxmox_virtual_environment_file.ubuntu_24_04</title>
 <path fill="none" stroke="black" d="M1387.29,-299.08C1336.94,-313.88 1277.74,-340.15 1243,-386 1191.18,-454.38 1275.19,-515.86 1215,-577 1213.11,-578.92 1211.14,-580.75 1209.11,-582.49"/>
 <polygon fill="black" stroke="black" points="1206.76,-579.89 1200.98,-588.77 1211.03,-585.43 1206.76,-579.89"/>
@@ -1098,7 +1116,7 @@
 <text text-anchor="middle" x="2637" y="-111.3" font-family="sans-serif" font-size="14.00">null_resource.setup_tailscale_web_service</text>
 </g>
 <!-- module.pve_lxc_instance_tailscale.null_resource.connect_tailscale&#45;&gt;module.pve_lxc_instance_tailscale.null_resource.setup_tailscale_web_service -->
-<g id="edge83" class="edge">
+<g id="edge86" class="edge">
 <title>module.pve_lxc_instance_tailscale.null_resource.connect_tailscale&#45;&gt;module.pve_lxc_instance_tailscale.null_resource.setup_tailscale_web_service</title>
 <path fill="none" stroke="black" d="M2968.32,-115C2917.35,-115 2856.35,-115 2800.72,-115"/>
 <polygon fill="black" stroke="black" points="2800.4,-111.5 2790.4,-115 2800.4,-118.5 2800.4,-111.5"/>
@@ -1116,7 +1134,7 @@
 <text text-anchor="middle" x="1479.5" y="-111.3" font-family="sans-serif" font-size="14.00">proxmox_virtual_environment_container.tailscale_container</text>
 </g>
 <!-- module.pve_lxc_instance_tailscale.null_resource.setup_container&#45;&gt;module.pve_lxc_instance_tailscale.proxmox_virtual_environment_container.tailscale_container -->
-<g id="edge84" class="edge">
+<g id="edge87" class="edge">
 <title>module.pve_lxc_instance_tailscale.null_resource.setup_container&#45;&gt;module.pve_lxc_instance_tailscale.proxmox_virtual_environment_container.tailscale_container</title>
 <path fill="none" stroke="black" d="M1811.91,-115C1778.54,-115 1740.68,-115 1702.78,-115"/>
 <polygon fill="black" stroke="black" points="1702.62,-111.5 1692.62,-115 1702.62,-118.5 1702.62,-111.5"/>
@@ -1128,13 +1146,13 @@
 <text text-anchor="middle" x="2284.5" y="-111.3" font-family="sans-serif" font-size="14.00">null_resource.setup_tailscale_service</text>
 </g>
 <!-- module.pve_lxc_instance_tailscale.null_resource.setup_tailscale_service&#45;&gt;module.pve_lxc_instance_tailscale.null_resource.setup_container -->
-<g id="edge85" class="edge">
+<g id="edge88" class="edge">
 <title>module.pve_lxc_instance_tailscale.null_resource.setup_tailscale_service&#45;&gt;module.pve_lxc_instance_tailscale.null_resource.setup_container</title>
 <path fill="none" stroke="black" d="M2148.99,-115C2115.32,-115 2079.4,-115 2046.4,-115"/>
 <polygon fill="black" stroke="black" points="2046.27,-111.5 2036.27,-115 2046.27,-118.5 2046.27,-111.5"/>
 </g>
 <!-- module.pve_lxc_instance_tailscale.null_resource.setup_tailscale_web_service&#45;&gt;module.pve_lxc_instance_tailscale.null_resource.setup_tailscale_service -->
-<g id="edge86" class="edge">
+<g id="edge89" class="edge">
 <title>module.pve_lxc_instance_tailscale.null_resource.setup_tailscale_web_service&#45;&gt;module.pve_lxc_instance_tailscale.null_resource.setup_tailscale_service</title>
 <path fill="none" stroke="black" d="M2483.79,-115C2466.11,-115 2448.11,-115 2430.53,-115"/>
 <polygon fill="black" stroke="black" points="2430.23,-111.5 2420.23,-115 2430.23,-118.5 2430.23,-111.5"/>
@@ -1146,7 +1164,7 @@
 <text text-anchor="middle" x="1029.5" y="-138.3" font-family="sans-serif" font-size="14.00">random_password.container_password</text>
 </g>
 <!-- module.pve_lxc_instance_tailscale.proxmox_virtual_environment_container.tailscale_container&#45;&gt;module.pve_lxc_instance_tailscale.random_password.container_password -->
-<g id="edge87" class="edge">
+<g id="edge90" class="edge">
 <title>module.pve_lxc_instance_tailscale.proxmox_virtual_environment_container.tailscale_container&#45;&gt;module.pve_lxc_instance_tailscale.random_password.container_password</title>
 <path fill="none" stroke="black" d="M1266.31,-127.79C1238.13,-129.49 1209.71,-131.2 1182.82,-132.82"/>
 <polygon fill="black" stroke="black" points="1182.37,-129.34 1172.59,-133.44 1182.79,-136.33 1182.37,-129.34"/>
@@ -1158,7 +1176,7 @@
 <text text-anchor="middle" x="1029.5" y="-30.3" font-family="sans-serif" font-size="14.00">terraform_data.container_replacer</text>
 </g>
 <!-- module.pve_lxc_instance_tailscale.proxmox_virtual_environment_container.tailscale_container&#45;&gt;module.pve_lxc_instance_tailscale.terraform_data.container_replacer -->
-<g id="edge88" class="edge">
+<g id="edge91" class="edge">
 <title>module.pve_lxc_instance_tailscale.proxmox_virtual_environment_container.tailscale_container&#45;&gt;module.pve_lxc_instance_tailscale.terraform_data.container_replacer</title>
 <path fill="none" stroke="black" d="M1396.54,-96.95C1344.65,-85.84 1276.06,-71.72 1215,-61 1199.16,-58.22 1182.51,-55.5 1165.98,-52.93"/>
 <polygon fill="black" stroke="black" points="1166.12,-49.41 1155.7,-51.34 1165.05,-56.33 1166.12,-49.41"/>
@@ -1170,13 +1188,13 @@
 <text text-anchor="middle" x="1029.5" y="-84.3" font-family="sans-serif" font-size="14.00">tls_private_key.container_key</text>
 </g>
 <!-- module.pve_lxc_instance_tailscale.proxmox_virtual_environment_container.tailscale_container&#45;&gt;module.pve_lxc_instance_tailscale.tls_private_key.container_key -->
-<g id="edge89" class="edge">
+<g id="edge92" class="edge">
 <title>module.pve_lxc_instance_tailscale.proxmox_virtual_environment_container.tailscale_container&#45;&gt;module.pve_lxc_instance_tailscale.tls_private_key.container_key</title>
 <path fill="none" stroke="black" d="M1266.31,-102.21C1225.89,-99.78 1184.96,-97.31 1148.8,-95.13"/>
 <polygon fill="black" stroke="black" points="1148.93,-91.63 1138.74,-94.52 1148.51,-98.62 1148.93,-91.63"/>
 </g>
 <!-- module.pve_lxc_instance_tailscale.proxmox_virtual_environment_container.tailscale_container&#45;&gt;module.pve_lxc_templates.proxmox_virtual_environment_file.ubuntu_24_04 -->
-<g id="edge90" class="edge">
+<g id="edge93" class="edge">
 <title>module.pve_lxc_instance_tailscale.proxmox_virtual_environment_container.tailscale_container&#45;&gt;module.pve_lxc_templates.proxmox_virtual_environment_file.ubuntu_24_04</title>
 <path fill="none" stroke="black" d="M1341.38,-133.03C1303.94,-144.72 1267.1,-163.83 1243,-195 1190.93,-262.33 1272.48,-514.22 1215,-577 1213.35,-578.8 1211.64,-580.52 1209.88,-582.16"/>
 <polygon fill="black" stroke="black" points="1207.24,-579.8 1201.78,-588.88 1211.71,-585.19 1207.24,-579.8"/>
@@ -1194,7 +1212,7 @@
 <text text-anchor="middle" x="1924" y="-1913.3" font-family="sans-serif" font-size="14.00">null_resource.configure_k3s_proxy</text>
 </g>
 <!-- module.pve_vm_k3s_master.data.external.kubeconfig&#45;&gt;module.pve_vm_k3s_master.null_resource.configure_k3s_proxy -->
-<g id="edge91" class="edge">
+<g id="edge94" class="edge">
 <title>module.pve_vm_k3s_master.data.external.kubeconfig&#45;&gt;module.pve_vm_k3s_master.null_resource.configure_k3s_proxy</title>
 <path fill="none" stroke="black" d="M2189.78,-1917C2150.69,-1917 2104.52,-1917 2061.77,-1917"/>
 <polygon fill="black" stroke="black" points="2061.56,-1913.5 2051.56,-1917 2061.56,-1920.5 2061.56,-1913.5"/>
@@ -1206,7 +1224,7 @@
 <text text-anchor="middle" x="1479.5" y="-1913.3" font-family="sans-serif" font-size="14.00">null_resource.install_k3s_master</text>
 </g>
 <!-- module.pve_vm_k3s_master.null_resource.configure_k3s_proxy&#45;&gt;module.pve_vm_k3s_master.null_resource.install_k3s_master -->
-<g id="edge92" class="edge">
+<g id="edge95" class="edge">
 <title>module.pve_vm_k3s_master.null_resource.configure_k3s_proxy&#45;&gt;module.pve_vm_k3s_master.null_resource.install_k3s_master</title>
 <path fill="none" stroke="black" d="M1796.49,-1917C1738.18,-1917 1669.05,-1917 1610.34,-1917"/>
 <polygon fill="black" stroke="black" points="1610.25,-1913.5 1600.25,-1917 1610.25,-1920.5 1610.25,-1913.5"/>
@@ -1218,7 +1236,7 @@
 <text text-anchor="middle" x="1029.5" y="-1859.3" font-family="sans-serif" font-size="14.00">proxmox_virtual_environment_vm.k3s_master</text>
 </g>
 <!-- module.pve_vm_k3s_master.null_resource.install_k3s_master&#45;&gt;module.pve_vm_k3s_master.proxmox_virtual_environment_vm.k3s_master -->
-<g id="edge93" class="edge">
+<g id="edge96" class="edge">
 <title>module.pve_vm_k3s_master.null_resource.install_k3s_master&#45;&gt;module.pve_vm_k3s_master.proxmox_virtual_environment_vm.k3s_master</title>
 <path fill="none" stroke="black" d="M1358.96,-1903.58C1321.8,-1899.33 1280.69,-1894.55 1243,-1890 1222.76,-1887.55 1201.45,-1884.92 1180.44,-1882.28"/>
 <polygon fill="black" stroke="black" points="1180.85,-1878.81 1170.49,-1881.03 1179.98,-1885.75 1180.85,-1878.81"/>
@@ -1230,7 +1248,7 @@
 <text text-anchor="middle" x="1479.5" y="-1859.3" font-family="sans-serif" font-size="14.00">null_resource.manage_ssh_keys</text>
 </g>
 <!-- module.pve_vm_k3s_master.null_resource.manage_ssh_keys&#45;&gt;module.pve_vm_k3s_master.proxmox_virtual_environment_vm.k3s_master -->
-<g id="edge94" class="edge">
+<g id="edge97" class="edge">
 <title>module.pve_vm_k3s_master.null_resource.manage_ssh_keys&#45;&gt;module.pve_vm_k3s_master.proxmox_virtual_environment_vm.k3s_master</title>
 <path fill="none" stroke="black" d="M1360.21,-1863C1313.54,-1863 1258.94,-1863 1207.75,-1863"/>
 <polygon fill="black" stroke="black" points="1207.56,-1859.5 1197.56,-1863 1207.56,-1866.5 1207.56,-1859.5"/>
@@ -1248,7 +1266,7 @@
 <text text-anchor="middle" x="137" y="-1859.3" font-family="sans-serif" font-size="14.00">random_password.vm_password</text>
 </g>
 <!-- module.pve_vm_k3s_master.proxmox_virtual_environment_file.cloud_init_config&#45;&gt;module.pve_vm_k3s_master.random_password.vm_password -->
-<g id="edge95" class="edge">
+<g id="edge98" class="edge">
 <title>module.pve_vm_k3s_master.proxmox_virtual_environment_file.cloud_init_config&#45;&gt;module.pve_vm_k3s_master.random_password.vm_password</title>
 <path fill="none" stroke="black" d="M369.42,-1863C335.42,-1863 300.57,-1863 268.58,-1863"/>
 <polygon fill="black" stroke="black" points="268.3,-1859.5 258.3,-1863 268.3,-1866.5 268.3,-1859.5"/>
@@ -1260,19 +1278,19 @@
 <text text-anchor="middle" x="137" y="-1913.3" font-family="sans-serif" font-size="14.00">tls_private_key.vm_key</text>
 </g>
 <!-- module.pve_vm_k3s_master.proxmox_virtual_environment_file.cloud_init_config&#45;&gt;module.pve_vm_k3s_master.tls_private_key.vm_key -->
-<g id="edge96" class="edge">
+<g id="edge99" class="edge">
 <title>module.pve_vm_k3s_master.proxmox_virtual_environment_file.cloud_init_config&#45;&gt;module.pve_vm_k3s_master.tls_private_key.vm_key</title>
 <path fill="none" stroke="black" d="M369.23,-1879.66C341.3,-1882.74 312.86,-1886.2 286,-1890 269.25,-1892.37 251.49,-1895.27 234.32,-1898.28"/>
 <polygon fill="black" stroke="black" points="233.52,-1894.86 224.29,-1900.06 234.75,-1901.76 233.52,-1894.86"/>
 </g>
 <!-- module.pve_vm_k3s_master.proxmox_virtual_environment_vm.k3s_master&#45;&gt;module.pve_vm_cloud_images.proxmox_virtual_environment_download_file.ubuntu_24_04_cloud_image -->
-<g id="edge97" class="edge">
+<g id="edge100" class="edge">
 <title>module.pve_vm_k3s_master.proxmox_virtual_environment_vm.k3s_master&#45;&gt;module.pve_vm_cloud_images.proxmox_virtual_environment_download_file.ubuntu_24_04_cloud_image</title>
 <path fill="none" stroke="black" d="M925.97,-1844.99C850.1,-1831.66 746.79,-1813.51 668.62,-1799.78"/>
 <polygon fill="black" stroke="black" points="669.19,-1796.33 658.73,-1798.05 667.98,-1803.22 669.19,-1796.33"/>
 </g>
 <!-- module.pve_vm_k3s_master.proxmox_virtual_environment_vm.k3s_master&#45;&gt;module.pve_vm_k3s_master.proxmox_virtual_environment_file.cloud_init_config -->
-<g id="edge98" class="edge">
+<g id="edge101" class="edge">
 <title>module.pve_vm_k3s_master.proxmox_virtual_environment_vm.k3s_master&#45;&gt;module.pve_vm_k3s_master.proxmox_virtual_environment_file.cloud_init_config</title>
 <path fill="none" stroke="black" d="M861.25,-1863C825.58,-1863 787.61,-1863 751,-1863"/>
 <polygon fill="black" stroke="black" points="750.71,-1859.5 740.71,-1863 750.71,-1866.5 750.71,-1859.5"/>
@@ -1284,7 +1302,7 @@
 <text text-anchor="middle" x="555" y="-1913.3" font-family="sans-serif" font-size="14.00">terraform_data.vm_replacer</text>
 </g>
 <!-- module.pve_vm_k3s_master.proxmox_virtual_environment_vm.k3s_master&#45;&gt;module.pve_vm_k3s_master.terraform_data.vm_replacer -->
-<g id="edge99" class="edge">
+<g id="edge102" class="edge">
 <title>module.pve_vm_k3s_master.proxmox_virtual_environment_vm.k3s_master&#45;&gt;module.pve_vm_k3s_master.terraform_data.vm_replacer</title>
 <path fill="none" stroke="black" d="M896.57,-1881.03C872.44,-1884.15 847.48,-1887.27 824,-1890 773.48,-1895.88 717.51,-1901.64 669.84,-1906.31"/>
 <polygon fill="black" stroke="black" points="669.42,-1902.84 659.8,-1907.29 670.1,-1909.81 669.42,-1902.84"/>
