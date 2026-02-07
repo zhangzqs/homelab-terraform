@@ -53,16 +53,16 @@ resource "kubernetes_deployment_v1" "deployment" {
             }
           }
 
-          resources {
-            requests = {
-              cpu    = var.container_resources.requests.cpu
-              memory = var.container_resources.requests.memory
-            }
-            limits = {
-              cpu    = var.container_resources.limits.cpu
-              memory = var.container_resources.limits.memory
-            }
-          }
+          # resources {
+          #   requests = {
+          #     cpu    = var.container_resources.requests.cpu
+          #     memory = var.container_resources.requests.memory
+          #   }
+          #   limits = {
+          #     cpu    = var.container_resources.limits.cpu
+          #     memory = var.container_resources.limits.memory
+          #   }
+          # }
 
           dynamic "liveness_probe" {
             for_each = var.liveness_probe.enabled ? [1] : []

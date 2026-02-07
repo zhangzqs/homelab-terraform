@@ -34,3 +34,27 @@ module "vaultwarden" {
   gateway_namespace      = module.gateway.gateway_namespace
   pvc_storage_class_name = module.nfs_storage_class.storage_class_name
 }
+
+module "it_tools" {
+  source = "../apps/it_tools"
+
+  providers = {
+    kubernetes = kubernetes
+  }
+
+  httproute_hostname = "it-tools.${var.httproute_base_hostname}"
+  gateway_name       = module.gateway.gateway_name
+  gateway_namespace  = module.gateway.gateway_namespace
+}
+
+module "drawio" {
+  source = "../apps/drawio"
+
+  providers = {
+    kubernetes = kubernetes
+  }
+
+  httproute_hostname = "drawio.${var.httproute_base_hostname}"
+  gateway_name       = module.gateway.gateway_name
+  gateway_namespace  = module.gateway.gateway_namespace
+}

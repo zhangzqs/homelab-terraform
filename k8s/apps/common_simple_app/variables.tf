@@ -43,30 +43,6 @@ variable "container_ports" {
   default = []
 }
 
-variable "container_resources" {
-  description = "容器资源请求和限制"
-  type = object({
-    requests = object({
-      cpu    = optional(string, "100m")
-      memory = optional(string, "128Mi")
-    })
-    limits = object({
-      cpu    = optional(string, "500m")
-      memory = optional(string, "512Mi")
-    })
-  })
-  default = {
-    requests = {
-      cpu    = "100m"
-      memory = "128Mi"
-    }
-    limits = {
-      cpu    = "500m"
-      memory = "256Mi"
-    }
-  }
-}
-
 variable "service_ports" {
   description = "服务端口列表（可选，为空时不创建 Service 资源）"
   type = list(object({

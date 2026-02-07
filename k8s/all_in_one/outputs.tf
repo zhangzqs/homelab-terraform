@@ -4,5 +4,7 @@ output "service_name_list" {
     "speedtest",
     "plantuml",
     "vaultwarden",
+    "it-tools",
+    "drawio"
   ]
 }
