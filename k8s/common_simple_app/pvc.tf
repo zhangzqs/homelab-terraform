@@ -1,5 +1,10 @@
 resource "kubernetes_persistent_volume_claim_v1" "pvc" {
-  for_each = { for pv in var.persistent_volumes : pv.name => pv }
+  # 只为没有指定 claim_name 的 volume_mounts 创建新的 PVC
+  for_each = {
+    for vm in var.volume_mounts :
+    vm.name => vm
+    if vm.claim_name == null
+  }
 
   depends_on = [
     kubernetes_namespace_v1.namespace

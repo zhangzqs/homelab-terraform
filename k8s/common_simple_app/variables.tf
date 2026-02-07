@@ -196,14 +196,15 @@ variable "gateway_namespace" {
   }
 }
 
-variable "persistent_volumes" {
-  description = "持久化卷配置列表"
+variable "volume_mounts" {
+  description = "持久化卷挂载配置列表"
   type = list(object({
-    name          = string // 挂载的 volume 名称
-    mount_path    = string // 容器内挂载路径
-    storage_size  = optional(string, "1Gi") // 存储大小，默认为 1Gi
-    storage_class = optional(string, null)
-    access_modes  = optional(list(string), ["ReadWriteOnce"]) // 可被单节点读写挂载
+    name          = string                                    // 挂载的 volume 名称（用于容器内识别）
+    mount_path    = string                                    // 容器内挂载路径
+    claim_name    = optional(string, null)                    // 引用已存在的 PVC 名称（可选）。如果指定，则使用已有 PVC；如果为 null，则创建新 PVC
+    storage_size  = optional(string, "1Gi")                   // 存储大小，默认为 1Gi（仅在创建新 PVC 时使用）
+    storage_class = optional(string, null)                    // 存储类名称，null 表示不指定（使用默认或动态供应，仅在创建新 PVC 时使用）
+    access_modes  = optional(list(string), ["ReadWriteOnce"]) // 访问模式（仅在创建新 PVC 时使用）
   }))
   default = []
 }

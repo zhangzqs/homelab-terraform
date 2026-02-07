@@ -93,7 +93,7 @@ resource "kubernetes_deployment_v1" "deployment" {
           }
 
           dynamic "volume_mount" {
-            for_each = var.persistent_volumes
+            for_each = var.volume_mounts
             content {
               name       = volume_mount.value.name
               mount_path = volume_mount.value.mount_path
@@ -102,12 +102,13 @@ resource "kubernetes_deployment_v1" "deployment" {
         }
 
         dynamic "volume" {
-          for_each = var.persistent_volumes
+          for_each = var.volume_mounts
           content {
             name = volume.value.name
 
             persistent_volume_claim {
-              claim_name = "${local.app_name}-${volume.value.name}"
+              # 如果指定了 claim_name，使用已存在的 PVC；否则使用自动创建的 PVC
+              claim_name = volume.value.claim_name != null ? volume.value.claim_name : "${local.app_name}-${volume.value.name}"
             }
           }
         }
