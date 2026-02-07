@@ -1,11 +1,11 @@
-module "vaultwarden" {
+module "app" {
   source = "../common_simple_app"
 
   providers = {
     kubernetes = kubernetes
   }
 
-  app_name        = 
+  app_name        = "vaultwarden"
   namespace       = "vaultwarden"
   container_image = "vaultwarden/server:1.35.2"
 
@@ -26,11 +26,16 @@ module "vaultwarden" {
     }
   ]
 
-  persistent_volumes = [
+  # 持久化存储配置
+  # 方式1：自动创建新的 PVC（默认）
+  volume_mounts = [
     {
       name         = "data"
       mount_path   = "/data"
-      storage_size = "5Gi"
+      storage_size = "1Gi"
+
+      # 可以指定 StorageClass，如果不指定则使用默认的
+      storage_class = var.pvc_storage_class_name
     }
   ]
 

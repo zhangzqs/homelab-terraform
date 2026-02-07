@@ -22,3 +22,13 @@ variable "httproute_base_hostname" {
   description = "HTTPRoute 基础访问域名，用于构建各服务的完整访问域名"
   type        = string
 }
+
+variable "nfs_server" {
+  description = "NFS 服务器地址"
+  type        = string
+}
+
+variable "nfs_share_path" {
+  description = "NFS 共享路径"
+  type        = string
+}

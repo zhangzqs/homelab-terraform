@@ -10,4 +10,6 @@ module "k8s" {
   k8s_client_certificate     = module.pve_vm_k3s_master.k8s_client_certificate
 
   httproute_base_hostname = var.home_base_domain
+  nfs_server              = module.pve_lxc_instance_storage_server.server_ip
+  nfs_share_path          = "/root/test_nfs"
 }
