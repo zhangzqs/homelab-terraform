@@ -142,27 +142,27 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
 
       # Grafana - 可视化面板
       grafana = {
-        enabled        = true
-        adminPassword  = var.grafana_admin_password
+        enabled       = true
+        adminPassword = var.grafana_admin_password
         persistence = var.grafana_storage_enabled ? {
           enabled          = true
           storageClassName = var.vm_storage_class
           size             = var.grafana_storage_size
-        } : {
+          } : {
           enabled = false
         }
         sidecar = {
           datasources = {
-            enabled       = true
+            enabled           = true
             defaultDatasource = true
           }
           dashboards = {
-            enabled = true
+            enabled         = true
             searchNamespace = "ALL"
           }
         }
         service = {
-          type = var.grafana_service_type
+          type     = var.grafana_service_type
           nodePort = var.grafana_nodeport
         }
         resources = {
@@ -231,20 +231,20 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
         create = true
         rules = {
           # Kubernetes 相关规则
-          kubeApiserver          = true
+          kubeApiserver             = true
           kubeApiserverAvailability = true
-          kubeApiserverSlos      = true
-          kubeControllerManager  = true
-          kubeScheduler         = true
-          kubeStateMetrics      = true
-          kubelet               = true
-          kubernetesApps        = true
-          kubernetesResources   = true
-          kubernetesStorage     = true
-          kubernetesSystem      = true
-          node                  = true
+          kubeApiserverSlos         = true
+          kubeControllerManager     = true
+          kubeScheduler             = true
+          kubeStateMetrics          = true
+          kubelet                   = true
+          kubernetesApps            = true
+          kubernetesResources       = true
+          kubernetesStorage         = true
+          kubernetesSystem          = true
+          node                      = true
           # VictoriaMetrics 相关规则
-          vmhealth              = true
+          vmhealth = true
         }
       }
 
@@ -254,7 +254,7 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
       }
 
       # Scrape 配置
-      scrapeInterval = "30s"
+      scrapeInterval     = "30s"
       evaluationInterval = "30s"
     })
   ]
