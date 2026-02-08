@@ -70,9 +70,9 @@ variable "nfs_exports" {
 variable "smb_shares" {
   description = "SMB共享目录配置列表"
   type = list(object({
-    name      = string           # 共享名称
-    path      = string           # 共享路径
-    read_only = optional(bool)   # 是否只读，默认 false
+    name      = string         # 共享名称
+    path      = string         # 共享路径
+    read_only = optional(bool) # 是否只读，默认 false
   }))
   default = []
 }
