@@ -24,6 +24,11 @@ module "auto_disk_mount" {
   automount_timeout = 300               // 秒，0表示永不超时卸载
 }
 
+locals {
+  // 通过NFS共享的路径，供k8s集群作为持久化卷使用
+  k8s_volumes_nfs_path = "/root/container_volumes"
+}
+
 module "pve_lxc_instance_storage_server" {
   source = "../pve/lxcs/storage_server"
 
@@ -45,6 +50,24 @@ module "pve_lxc_instance_storage_server" {
       path = local.k8s_volumes_nfs_path
     },
   ]
+
+  smb_shares = [
+    {
+      name      = "k8s-volumes-ro"
+      path      = local.k8s_volumes_nfs_path
+      read_only = true
+    },
+    {
+      name      = "hdd-disk-rw"
+      path      = "/mnt/host_hdd_disk"
+      read_only = false
+    }
+  ]
+
+  smb_user = {
+    username = "admin"
+    password = var.smb_hdd_password
+  }
 
   host_mount_points = [
     {

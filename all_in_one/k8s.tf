@@ -1,8 +1,3 @@
-locals {
-  // 通过NFS共享的路径，供k8s集群作为持久化卷使用
-  k8s_volumes_nfs_path = "/root/container_volumes"
-}
-
 // 这个模块能正常工作需要提前依赖
 // terraform apply -target=module.pve_vm_k3s_master
 // 这个资源的创建

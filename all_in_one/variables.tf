@@ -91,3 +91,9 @@ variable "hdd_disk_uuid" {
   description = "HDD磁盘的UUID，用于自动挂载"
   type        = string
 }
+
+variable "smb_hdd_password" {
+  description = "SMB共享使用的密码"
+  type        = string
+  sensitive   = true
+}
