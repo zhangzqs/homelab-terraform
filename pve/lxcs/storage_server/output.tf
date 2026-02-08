@@ -55,8 +55,8 @@ output "smb_shares" {
     for share in var.smb_shares : {
       name          = share.name
       path          = share.path
-      comment       = share.comment
-      mount_command = "mount -t cifs //${var.ipv4_address}/${share.name} /mnt -o guest"
+      read_only     = share.read_only != null ? share.read_only : false
+      mount_command = "mount -t cifs //${var.ipv4_address}/${share.name} /mnt -o username=USER,password=PASS"
     }
   ] : null
   description = "SMB 共享配置列表（仅在启用 SMB 时有效）"

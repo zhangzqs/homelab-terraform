@@ -67,33 +67,27 @@ variable "nfs_exports" {
 }
 
 # SMB 配置
-variable "smb_workgroup" {
-  description = "SMB工作组名称"
-  type        = string
-  default     = "WORKGROUP"
-}
-
-variable "smb_server_string" {
-  description = "SMB服务器描述字符串"
-  type        = string
-  default     = "Storage Server (Samba %v)"
-}
-
 variable "smb_shares" {
   description = "SMB共享目录配置列表"
   type = list(object({
-    name           = string                 # 共享名称
-    path           = string                 # 共享路径
-    comment        = optional(string)       # 共享描述
-    browseable     = optional(bool)         # 是否可浏览，默认 true
-    read_only      = optional(bool)         # 是否只读，默认 false
-    guest_ok       = optional(bool)         # 是否允许匿名访问，默认 true
-    valid_users    = optional(list(string)) # 允许访问的用户列表
-    allowed_hosts  = optional(string)       # 允许访问的主机/网络范围
-    create_mask    = optional(string)       # 文件创建掩码，默认 0777
-    directory_mask = optional(string)       # 目录创建掩码，默认 0777
+    name      = string           # 共享名称
+    path      = string           # 共享路径
+    read_only = optional(bool)   # 是否只读，默认 false
   }))
   default = []
+}
+
+variable "smb_user" {
+  description = "SMB用户账户配置（dockur/samba 单用户模式）"
+  type = object({
+    username = string # 用户名
+    password = string # 密码
+  })
+  default = {
+    username = "user"
+    password = "pass"
+  }
+  sensitive = true
 }
 
 

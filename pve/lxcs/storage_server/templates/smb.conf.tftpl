@@ -1,11 +1,11 @@
 [global]
-   workgroup = ${workgroup}
-   server string = ${server_string}
+   workgroup = WORKGROUP
+   server string = Samba Server
    security = user
    map to guest = Bad User
    server min protocol = SMB2
    dns proxy = no
-   log file = /var/log/samba/%%m.log
+   log file = /var/log/samba/%m.log
    max log size = 50
 
    # 禁用打印机服务
@@ -16,20 +16,16 @@
 
 %{~ for share in shares ~}
 [${share.name}]
-   comment = ${share.comment != null ? share.comment : "Network Storage"}
-   path = ${share.path}
-   browseable = ${share.browseable != null ? (share.browseable ? "yes" : "no") : "yes"}
+   comment = ${share.name} Share
+   path = /share/${share.name}
+   browseable = yes
    read only = ${share.read_only != null ? (share.read_only ? "yes" : "no") : "no"}
-   guest ok = ${share.guest_ok != null ? (share.guest_ok ? "yes" : "no") : "yes"}
-   create mask = ${share.create_mask != null ? share.create_mask : "0777"}
-   directory mask = ${share.directory_mask != null ? share.directory_mask : "0777"}
+   guest ok = no
+   valid users = ${username}
+   create mask = 0664
+   directory mask = 0775
+   # 以 root 用户强制执行，避免权限问题
    force user = root
    force group = root
-%{~ if share.valid_users != null ~}
-   valid users = ${join(" ", share.valid_users)}
-%{~ endif ~}
-%{~ if share.allowed_hosts != null ~}
-   hosts allow = ${share.allowed_hosts}
-%{~ endif ~}
 
 %{~ endfor ~}

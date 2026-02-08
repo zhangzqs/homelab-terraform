@@ -9,7 +9,7 @@ sed -i 's@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g' /etc/apt/sources.list
 sed -i 's/http:/https:/g' /etc/apt/sources.list
 
 # 基础软件包
-BASE_PACKAGES="curl openssh-server htop language-pack-zh-hans"
+BASE_PACKAGES="curl openssh-server htop language-pack-zh-hans jq"
 
 # 根据启用的协议添加相应的软件包
 STORAGE_PACKAGES=""
@@ -19,7 +19,7 @@ for protocol in "${ENABLED_PROTOCOLS[@]}"; do
       STORAGE_PACKAGES="$STORAGE_PACKAGES nfs-kernel-server"
       ;;
     smb)
-      STORAGE_PACKAGES="$STORAGE_PACKAGES samba samba-common-bin"
+      STORAGE_PACKAGES="$STORAGE_PACKAGES podman"
       ;;
     *)
       echo "Warning: Unknown protocol '$protocol'"
@@ -45,9 +45,10 @@ for protocol in "${ENABLED_PROTOCOLS[@]}"; do
       systemctl start nfs-kernel-server
       ;;
     smb)
-      echo "Enabling SMB service..."
-      systemctl enable smbd nmbd
-      systemctl start smbd nmbd
+      echo "Podman installed for SMB (container will be managed by Terraform)"
+      # 配置 Podman 支持 Docker API
+      systemctl enable podman.socket
+      systemctl start podman.socket
       ;;
   esac
 done

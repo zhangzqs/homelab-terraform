@@ -160,14 +160,19 @@ locals {
     if !contains(local.mounted_paths, export.path)
   ]
 
-  # 生成 SMB 配置
+  # 生成 SMB 环境变量（dockur/samba 单用户模式）
+  smb_env_vars = {
+    USER = var.smb_user.username
+    PASS = var.smb_user.password
+  }
+
+  # 生成 SMB 配置文件
   smb_config = templatefile("${path.module}/templates/smb.conf.tftpl", {
-    workgroup     = var.smb_workgroup
-    server_string = var.smb_server_string
-    shares        = var.smb_shares
+    username = var.smb_user.username
+    shares   = var.smb_shares
   })
 
-  # 生成 SMB 目录创建命令（跳过已挂载的目录）
+  # 生成 SMB 目录创建命令
   smb_mkdir_commands = [
     for share in var.smb_shares :
     "if ! mountpoint -q ${share.path} 2>/dev/null; then mkdir -p ${share.path} && chmod 755 ${share.path}; fi"
@@ -217,8 +222,8 @@ resource "null_resource" "configure_nfs" {
   }
 }
 
-# SMB 配置
-resource "null_resource" "configure_smb" {
+# SMB 配置（使用 Podman 运行 dockur/samba 容器）
+resource "null_resource" "prepare_smb_dirs" {
   count = contains(var.enabled_protocols, "smb") ? 1 : 0
 
   depends_on = [
@@ -226,22 +231,8 @@ resource "null_resource" "configure_smb" {
   ]
 
   triggers = {
-    version    = 2
     lxc_id     = proxmox_virtual_environment_container.storage_server_container.id
-    smb_config = sha256(local.smb_config)
-  }
-
-  provisioner "file" {
-    content     = local.smb_config
-    destination = "/tmp/smb.conf"
-
-    connection {
-      type        = "ssh"
-      user        = "root"
-      host        = var.ipv4_address
-      private_key = tls_private_key.container_key.private_key_pem
-      timeout     = "5m"
-    }
+    share_dirs = join(",", [for s in var.smb_shares : s.path])
   }
 
   provisioner "remote-exec" {
@@ -255,15 +246,79 @@ resource "null_resource" "configure_smb" {
 
     inline = concat(
       local.smb_mkdir_commands,
-      [
-        "cp /tmp/smb.conf /etc/samba/smb.conf",
-        "rm -f /tmp/smb.conf",
-        "systemctl restart smbd nmbd",
-        "sleep 2",
-        "systemctl status smbd --no-pager || true",
-        "systemctl status nmbd --no-pager || true",
-        "testparm -s || true",
-      ]
+      ["echo 'SMB directories prepared'"]
     )
+  }
+}
+
+resource "null_resource" "samba_container" {
+  count = contains(var.enabled_protocols, "smb") ? 1 : 0
+
+  depends_on = [
+    null_resource.prepare_smb_dirs
+  ]
+
+  triggers = {
+    lxc_id      = proxmox_virtual_environment_container.storage_server_container.id
+    user_hash   = sha256(jsonencode(var.smb_user))
+    shares_hash = sha256(jsonencode(var.smb_shares))
+    config_hash = sha256(local.smb_config)
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      user        = "root"
+      host        = var.ipv4_address
+      private_key = tls_private_key.container_key.private_key_pem
+      timeout     = "5m"
+    }
+
+    inline = [
+      # 配置 Podman 禁用 AppArmor
+      "mkdir -p /etc/containers",
+      "echo '[containers]' > /etc/containers/containers.conf",
+      "echo 'apparmor_profile = \"\"' >> /etc/containers/containers.conf",
+
+      # 停止并删除旧容器（如果存在）
+      "podman stop samba 2>/dev/null || true",
+      "podman rm samba 2>/dev/null || true",
+
+      # 拉取镜像
+      "podman pull ghcr.io/dockur/samba:4.22.6",
+
+      # 上传自定义配置文件
+      <<-EOT
+      cat > /tmp/smb.conf <<'SMBEOF'
+      ${local.smb_config}
+      SMBEOF
+      EOT
+      ,
+
+      # 构建环境变量参数
+      "ENV_ARGS='${join(" ", [for k, v in local.smb_env_vars : "-e ${k}=${v}"])}'",
+
+      # 构建卷挂载参数
+      "VOL_ARGS='${join(" ", [for s in var.smb_shares : "-v ${s.path}:/share/${s.name}:${s.read_only != null && s.read_only ? "ro" : "rw"}"])}'",
+
+      # 运行容器
+      <<-EOT
+      podman run -d \
+        --name samba \
+        --restart=always \
+        --network host \
+        $ENV_ARGS \
+        -v /tmp/smb.conf:/etc/samba/smb.conf:ro \
+        $VOL_ARGS \
+        ghcr.io/dockur/samba:4.22.6
+      EOT
+      ,
+
+      # 等待容器启动
+      "sleep 5",
+
+      # 检查容器状态
+      "podman ps --filter name=samba --format '{{.Status}}' | grep -q Up || (echo 'Samba container failed to start' && podman logs samba && exit 1)"
+    ]
   }
 }
