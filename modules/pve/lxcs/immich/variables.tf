@@ -95,3 +95,12 @@ variable "immich_version" {
   type        = string
   default     = "v2"
 }
+
+variable "install_proxy" {
+  description = "Immich 安装和镜像拉取使用的代理配置"
+  type = object({
+    http_proxy  = string
+    https_proxy = string
+  })
+  default = null
+}

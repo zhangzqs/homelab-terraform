@@ -88,6 +88,24 @@ locals {
     immich_version   = var.immich_version
     db_password      = random_password.db_password.result
   })
+  configure_docker_proxy_script = join("\n", var.install_proxy != null ? [
+    "#!/usr/bin/env bash",
+    "set -euo pipefail",
+    "mkdir -p /etc/systemd/system/docker.service.d",
+    "cat > /etc/systemd/system/docker.service.d/http-proxy.conf <<'EOF'",
+    "[Service]",
+    "Environment=\"HTTP_PROXY=${var.install_proxy.http_proxy}\"",
+    "Environment=\"HTTPS_PROXY=${var.install_proxy.https_proxy}\"",
+    "EOF",
+    "systemctl daemon-reload",
+    "systemctl restart docker",
+    ] : [
+    "#!/usr/bin/env bash",
+    "set -euo pipefail",
+    "rm -f /etc/systemd/system/docker.service.d/http-proxy.conf",
+    "systemctl daemon-reload",
+    "systemctl restart docker",
+  ])
 }
 
 resource "null_resource" "setup_container" {
@@ -127,7 +145,7 @@ resource "null_resource" "setup_container" {
 
 resource "null_resource" "deploy_immich" {
   depends_on = [
-    null_resource.setup_container
+    null_resource.configure_docker_proxy
   ]
 
   triggers = {
@@ -169,6 +187,38 @@ resource "null_resource" "deploy_immich" {
     inline = [
       "cd ${var.working_dir} && docker compose up -d",
       "cd ${var.working_dir} && docker compose ps",
+    ]
+  }
+}
+
+resource "null_resource" "configure_docker_proxy" {
+  depends_on = [
+    null_resource.setup_container
+  ]
+
+  triggers = {
+    res_vm_id         = proxmox_virtual_environment_container.immich_container.id
+    docker_proxy_hash = sha256(local.configure_docker_proxy_script)
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    host        = var.ipv4_address
+    private_key = tls_private_key.container_key.private_key_pem
+    timeout     = "5m"
+  }
+
+  provisioner "file" {
+    content     = local.configure_docker_proxy_script
+    destination = "/tmp/configure-docker-proxy.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/configure-docker-proxy.sh",
+      "/tmp/configure-docker-proxy.sh",
+      "rm -f /tmp/configure-docker-proxy.sh",
     ]
   }
 }
