@@ -4,6 +4,11 @@ resource "random_password" "container_password" {
   override_special = "_%@"
 }
 
+resource "random_password" "db_password" {
+  length  = 24
+  special = false
+}
+
 resource "tls_private_key" "container_key" {
   algorithm = "ED25519"
 }
@@ -69,5 +74,101 @@ resource "proxmox_virtual_environment_container" "immich_container" {
   operating_system {
     type             = "ubuntu"
     template_file_id = var.ubuntu_template_file_id
+  }
+}
+
+locals {
+  docker_compose_content = templatefile("${path.module}/templates/docker-compose.yml.tpl", {
+    immich_port = var.immich_port
+  })
+  immich_env_content = templatefile("${path.module}/templates/immich.env.tpl", {
+    upload_location  = var.upload_location
+    db_data_location = var.db_data_location
+    timezone         = var.timezone
+    immich_version   = var.immich_version
+    db_password      = random_password.db_password.result
+  })
+}
+
+resource "null_resource" "setup_container" {
+  depends_on = [
+    proxmox_virtual_environment_container.immich_container
+  ]
+
+  triggers = {
+    res_vm_id   = proxmox_virtual_environment_container.immich_container.id
+    version     = 1
+    file_hash   = filesha256("${path.module}/scripts/setup.sh")
+    host        = var.ipv4_address
+    working_dir = var.working_dir
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    host        = var.ipv4_address
+    private_key = tls_private_key.container_key.private_key_pem
+    timeout     = "5m"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/scripts/setup.sh"
+    destination = "/tmp/setup.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/setup.sh",
+      "/tmp/setup.sh",
+      "rm -f /tmp/setup.sh",
+    ]
+  }
+}
+
+resource "null_resource" "deploy_immich" {
+  depends_on = [
+    null_resource.setup_container
+  ]
+
+  triggers = {
+    res_vm_id           = proxmox_virtual_environment_container.immich_container.id
+    docker_compose_hash = sha256(local.docker_compose_content)
+    immich_env_hash     = sha256(local.immich_env_content)
+    working_dir         = var.working_dir
+    upload_location     = var.upload_location
+    db_data_location    = var.db_data_location
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    host        = var.ipv4_address
+    private_key = tls_private_key.container_key.private_key_pem
+    timeout     = "5m"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir -p ${var.working_dir}",
+      "mkdir -p ${var.upload_location}",
+      "mkdir -p ${var.db_data_location}",
+    ]
+  }
+
+  provisioner "file" {
+    content     = local.immich_env_content
+    destination = "${var.working_dir}/.env"
+  }
+
+  provisioner "file" {
+    content     = local.docker_compose_content
+    destination = "${var.working_dir}/docker-compose.yml"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "cd ${var.working_dir} && docker compose up -d",
+      "cd ${var.working_dir} && docker compose ps",
+    ]
   }
 }
