@@ -5,7 +5,7 @@ output "container_password" {
 }
 
 output "container_private_key" {
-  value       = tls_private_key.container_key.private_key_pem
+  value       = tls_private_key.container_key.private_key_openssh
   description = "容器 SSH 私钥"
   sensitive   = true
 }
@@ -75,4 +75,3 @@ output "host_mount_points" {
   ] : null
   description = "宿主机到容器的挂载点列表"
 }
-

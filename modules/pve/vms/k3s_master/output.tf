@@ -5,7 +5,7 @@ output "vm_password" {
 }
 
 output "vm_private_key" {
-  value       = tls_private_key.vm_key.private_key_pem
+  value       = tls_private_key.vm_key.private_key_openssh
   description = "虚拟机 SSH 私钥"
   sensitive   = true
 }

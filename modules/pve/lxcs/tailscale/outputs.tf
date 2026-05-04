@@ -20,7 +20,7 @@ output "container_password" {
 }
 
 output "container_private_key" {
-  value       = tls_private_key.container_key.private_key_pem
+  value       = tls_private_key.container_key.private_key_openssh
   description = "Tailscale容器SSH私钥"
   sensitive   = true
 }

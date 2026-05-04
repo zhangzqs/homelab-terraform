@@ -10,7 +10,7 @@ output "container_password" {
 }
 
 output "ssh_private_key" {
-  value       = tls_private_key.container_key.private_key_pem
+  value       = tls_private_key.container_key.private_key_openssh
   description = "SSH私钥用于容器访问"
   sensitive   = true
 }

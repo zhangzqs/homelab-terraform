@@ -20,7 +20,7 @@ output "hostname" {
 
 output "ssh_private_key" {
   description = "SSH私钥(敏感)"
-  value       = tls_private_key.container_key.private_key_pem
+  value       = tls_private_key.container_key.private_key_openssh
   sensitive   = true
 }
 
