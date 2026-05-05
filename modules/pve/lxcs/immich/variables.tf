@@ -78,6 +78,60 @@ variable "db_data_location" {
   default     = "/opt/immich/postgres"
 }
 
+variable "host_mount_points" {
+  description = "从宿主机挂载到容器的目录列表"
+  type = list(object({
+    host_path      = string
+    container_path = string
+    read_only      = optional(bool)
+    shared         = optional(bool)
+    backup         = optional(bool)
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for mp in var.host_mount_points :
+      can(regex("^/", mp.host_path)) && can(regex("^/", mp.container_path))
+    ])
+    error_message = "宿主机路径和容器路径必须是绝对路径（以 / 开头）"
+  }
+}
+
+variable "backup_target_dir" {
+  description = "Immich 备份落盘目录；设置后会启用每日 rsync 备份"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.backup_target_dir == null || can(regex("^/", var.backup_target_dir))
+    error_message = "备份目录必须是绝对路径（以 / 开头）"
+  }
+}
+
+variable "backup_schedule" {
+  description = "Immich 每日备份的 crontab 表达式"
+  type        = string
+  default     = "0 3 * * *"
+}
+
+variable "mirror_target_dir" {
+  description = "Immich 镜像同步目录；设置后会启用每日 rsync --delete mirror 任务"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.mirror_target_dir == null || can(regex("^/", var.mirror_target_dir))
+    error_message = "镜像目录必须是绝对路径（以 / 开头）"
+  }
+}
+
+variable "mirror_schedule" {
+  description = "Immich 每日 mirror 的 crontab 表达式"
+  type        = string
+  default     = "30 3 * * *"
+}
+
 variable "immich_port" {
   description = "Immich Web 服务端口"
   type        = number

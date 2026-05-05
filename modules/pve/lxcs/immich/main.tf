@@ -67,6 +67,17 @@ resource "proxmox_virtual_environment_container" "immich_container" {
     size         = var.disk_size
   }
 
+  dynamic "mount_point" {
+    for_each = var.host_mount_points
+    content {
+      volume    = mount_point.value.host_path
+      path      = mount_point.value.container_path
+      read_only = mount_point.value.read_only != null ? mount_point.value.read_only : false
+      shared    = mount_point.value.shared != null ? mount_point.value.shared : false
+      backup    = mount_point.value.backup != null ? mount_point.value.backup : false
+    }
+  }
+
   features {
     nesting = true
   }
@@ -88,6 +99,33 @@ locals {
     immich_version   = var.immich_version
     db_password      = random_password.db_password.result
   })
+  setup_container_command = var.install_proxy != null ? join(" ", [
+    "DOCKER_SETUP_HTTP_PROXY=${var.install_proxy.http_proxy}",
+    "DOCKER_SETUP_HTTPS_PROXY=${var.install_proxy.https_proxy}",
+    "/tmp/setup.sh",
+  ]) : "/tmp/setup.sh"
+  backup_script_content = var.backup_target_dir != null ? templatefile("${path.module}/templates/backup.sh.tpl", {
+    upload_location  = var.upload_location
+    db_data_location = var.db_data_location
+    backup_target_dir = var.backup_target_dir
+  }) : ""
+  mirror_script_content = var.mirror_target_dir != null ? templatefile("${path.module}/templates/mirror.sh.tpl", {
+    upload_location  = var.upload_location
+    db_data_location = var.db_data_location
+    mirror_target_dir = var.mirror_target_dir
+  }) : ""
+  backup_cron_content = var.backup_target_dir != null ? join("\n", [
+    "SHELL=/bin/bash",
+    "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "${var.backup_schedule} root /usr/local/bin/immich-backup.sh >> /var/log/immich-backup.log 2>&1",
+    "",
+  ]) : ""
+  mirror_cron_content = var.mirror_target_dir != null ? join("\n", [
+    "SHELL=/bin/bash",
+    "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "${var.mirror_schedule} root /usr/local/bin/immich-mirror.sh >> /var/log/immich-mirror.log 2>&1",
+    "",
+  ]) : ""
   configure_docker_proxy_script = join("\n", var.install_proxy != null ? [
     "#!/usr/bin/env bash",
     "set -euo pipefail",
@@ -119,6 +157,7 @@ resource "null_resource" "setup_container" {
     file_hash   = filesha256("${path.module}/scripts/setup.sh")
     host        = var.ipv4_address
     working_dir = var.working_dir
+    proxy_config = sha256(jsonencode(var.install_proxy))
   }
 
   connection {
@@ -137,7 +176,7 @@ resource "null_resource" "setup_container" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/setup.sh",
-      "/tmp/setup.sh",
+      local.setup_container_command,
       "rm -f /tmp/setup.sh",
     ]
   }
@@ -219,6 +258,94 @@ resource "null_resource" "configure_docker_proxy" {
       "chmod +x /tmp/configure-docker-proxy.sh",
       "/tmp/configure-docker-proxy.sh",
       "rm -f /tmp/configure-docker-proxy.sh",
+    ]
+  }
+}
+
+resource "null_resource" "configure_backup" {
+  count = var.backup_target_dir != null ? 1 : 0
+
+  depends_on = [
+    null_resource.deploy_immich
+  ]
+
+  triggers = {
+    res_vm_id         = proxmox_virtual_environment_container.immich_container.id
+    backup_script_hash = sha256(local.backup_script_content)
+    backup_cron_hash   = sha256(local.backup_cron_content)
+    backup_target_dir  = var.backup_target_dir
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    host        = var.ipv4_address
+    private_key = tls_private_key.container_key.private_key_pem
+    timeout     = "5m"
+  }
+
+  provisioner "file" {
+    content     = local.backup_script_content
+    destination = "/usr/local/bin/immich-backup.sh"
+  }
+
+  provisioner "file" {
+    content     = local.backup_cron_content
+    destination = "/etc/cron.d/immich-backup"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /usr/local/bin/immich-backup.sh",
+      "chmod 0644 /etc/cron.d/immich-backup",
+      "mkdir -p ${var.backup_target_dir}/immich_data",
+      "mkdir -p ${var.backup_target_dir}/immich_postgres_data",
+      "/usr/local/bin/immich-backup.sh",
+      "systemctl restart cron",
+    ]
+  }
+}
+
+resource "null_resource" "configure_mirror" {
+  count = var.mirror_target_dir != null ? 1 : 0
+
+  depends_on = [
+    null_resource.deploy_immich
+  ]
+
+  triggers = {
+    res_vm_id         = proxmox_virtual_environment_container.immich_container.id
+    mirror_script_hash = sha256(local.mirror_script_content)
+    mirror_cron_hash   = sha256(local.mirror_cron_content)
+    mirror_target_dir  = var.mirror_target_dir
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    host        = var.ipv4_address
+    private_key = tls_private_key.container_key.private_key_pem
+    timeout     = "5m"
+  }
+
+  provisioner "file" {
+    content     = local.mirror_script_content
+    destination = "/usr/local/bin/immich-mirror.sh"
+  }
+
+  provisioner "file" {
+    content     = local.mirror_cron_content
+    destination = "/etc/cron.d/immich-mirror"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /usr/local/bin/immich-mirror.sh",
+      "chmod 0644 /etc/cron.d/immich-mirror",
+      "mkdir -p ${var.mirror_target_dir}/immich_data",
+      "mkdir -p ${var.mirror_target_dir}/immich_postgres_data",
+      "/usr/local/bin/immich-mirror.sh",
+      "systemctl restart cron",
     ]
   }
 }
