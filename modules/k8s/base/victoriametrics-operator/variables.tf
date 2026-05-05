@@ -65,6 +65,51 @@ variable "grafana_nodeport" {
   default     = 30300
 }
 
+variable "grafana_httproute_enabled" {
+  description = "是否为 Grafana 启用 HTTPRoute (Gateway API)"
+  type        = bool
+  default     = false
+}
+
+variable "grafana_httproute_hostnames" {
+  description = "Grafana HTTPRoute 访问域名列表"
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = !var.grafana_httproute_enabled || length(var.grafana_httproute_hostnames) > 0
+    error_message = "如果启用 Grafana HTTPRoute，则必须提供至少一个访问域名"
+  }
+}
+
+variable "grafana_dashboard_data" {
+  description = "Grafana 自定义仪表板 ConfigMap data"
+  type        = map(string)
+  default     = {}
+}
+
+variable "gateway_name" {
+  description = "Grafana HTTPRoute 引用的 Gateway 资源名称"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.grafana_httproute_enabled || length(var.gateway_name) > 0
+    error_message = "如果启用 Grafana HTTPRoute，则必须提供 Gateway 资源名称"
+  }
+}
+
+variable "gateway_namespace" {
+  description = "Grafana HTTPRoute 引用的 Gateway 所在命名空间"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.grafana_httproute_enabled || length(var.gateway_namespace) > 0
+    error_message = "如果启用 Grafana HTTPRoute，则必须提供 Gateway 所在命名空间"
+  }
+}
+
 variable "vmalert_enabled" {
   description = "是否启用 VMAlert"
   type        = bool

@@ -270,3 +270,56 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
 
   depends_on = [helm_release.victoria_metrics_operator]
 }
+
+resource "kubernetes_manifest" "grafana_httproute" {
+  count = var.grafana_httproute_enabled ? 1 : 0
+
+  manifest = {
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "HTTPRoute"
+    metadata = {
+      name      = "grafana"
+      namespace = var.vm_namespace
+    }
+    spec = {
+      parentRefs = [
+        {
+          name      = var.gateway_name
+          namespace = var.gateway_namespace
+        }
+      ]
+      hostnames = var.grafana_httproute_hostnames
+      rules = [
+        {
+          backendRefs = [
+            {
+              name = "victoria-metrics-k8s-stack-grafana"
+              port = 80
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  depends_on = [helm_release.victoria_metrics_k8s_stack]
+}
+
+resource "kubernetes_manifest" "grafana_dashboards" {
+  count = length(var.grafana_dashboard_data) > 0 ? 1 : 0
+
+  manifest = {
+    apiVersion = "v1"
+    kind       = "ConfigMap"
+    metadata = {
+      name      = "grafana-dashboards"
+      namespace = var.vm_namespace
+      labels = {
+        grafana_dashboard = "1"
+      }
+    }
+    data = var.grafana_dashboard_data
+  }
+
+  depends_on = [helm_release.victoria_metrics_k8s_stack]
+}

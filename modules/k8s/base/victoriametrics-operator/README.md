@@ -49,6 +49,13 @@ module "victoriametrics" {
   grafana_admin_password = "your-secure-password"
   grafana_service_type   = "NodePort"
   grafana_nodeport       = 30300
+  grafana_httproute_enabled   = true
+  grafana_httproute_hostnames = ["grafana.example.com"]
+  gateway_name                = "shared-gateway"
+  gateway_namespace           = "gateway-system"
+  grafana_dashboard_data = {
+    "custom-dashboard.json" = file("${path.module}/dashboards/custom-dashboard.json")
+  }
 
   # 可选组件
   vmalert_enabled                = true
@@ -68,6 +75,11 @@ module "victoriametrics" {
 | `vm_retention_period` | `14d` | 数据保留时间（14天）|
 | `vmsingle_storage_size` | `20Gi` | VMSingle 存储容量 |
 | `grafana_admin_password` | `admin` | Grafana 管理员密码（生产环境请修改）|
+| `grafana_httproute_enabled` | `false` | 是否由模块创建 Grafana 的 HTTPRoute |
+| `grafana_httproute_hostnames` | `[]` | Grafana HTTPRoute 域名列表 |
+| `gateway_name` | `""` | Grafana HTTPRoute 引用的 Gateway 名称 |
+| `gateway_namespace` | `""` | Grafana HTTPRoute 引用的 Gateway 命名空间 |
+| `grafana_dashboard_data` | `{}` | 额外注入到 Grafana sidecar 的 dashboard ConfigMap data |
 | `grafana_nodeport` | `30300` | Grafana NodePort 端口 |
 | `vmalert_enabled` | `true` | 是否启用告警引擎 |
 | `alertmanager_enabled` | `true` | 是否启用告警管理器 |
