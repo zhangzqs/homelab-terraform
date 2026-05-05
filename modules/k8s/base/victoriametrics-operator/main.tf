@@ -167,6 +167,9 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
             searchNamespace = "ALL"
           }
         }
+        initChownData = {
+          enabled = false
+        }
         service = {
           type     = var.grafana_service_type
           nodePort = var.grafana_nodeport
