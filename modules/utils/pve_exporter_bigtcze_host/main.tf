@@ -157,7 +157,7 @@ locals {
 
 resource "null_resource" "pve_exporter_bigtcze_host" {
   triggers = {
-    setup_script_hash = sha256(local.setup_script)
+    setup_script_hash  = sha256(local.setup_script)
     verify_script_hash = sha256(local.verify_script)
     script_prefix      = local.script_prefix
     ssh_host           = var.ssh_host
