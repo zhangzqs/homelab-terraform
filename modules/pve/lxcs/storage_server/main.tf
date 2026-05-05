@@ -166,6 +166,9 @@ locals {
     PASS = var.smb_user.password
   }
 
+  smb_service_dir = "/root/services/samba"
+  smb_config_path = "${local.smb_service_dir}/smb.conf"
+
   # 生成 SMB 配置文件
   smb_config = templatefile("${path.module}/templates/smb.conf.tftpl", {
     username = var.smb_user.username
@@ -259,10 +262,11 @@ resource "null_resource" "samba_container" {
   ]
 
   triggers = {
-    lxc_id      = proxmox_virtual_environment_container.storage_server_container.id
-    user_hash   = sha256(jsonencode(var.smb_user))
-    shares_hash = sha256(jsonencode(var.smb_shares))
-    config_hash = sha256(local.smb_config)
+    lxc_id          = proxmox_virtual_environment_container.storage_server_container.id
+    user_hash       = sha256(jsonencode(var.smb_user))
+    shares_hash     = sha256(jsonencode(var.smb_shares))
+    config_hash     = sha256(local.smb_config)
+    smb_config_path = local.smb_config_path
   }
 
   provisioner "remote-exec" {
@@ -288,8 +292,9 @@ resource "null_resource" "samba_container" {
       "podman pull ghcr.io/dockur/samba:4.22.6",
 
       # 上传自定义配置文件
+      "mkdir -p /root/services/samba",
       <<-EOT
-      cat > /tmp/smb.conf <<'SMBEOF'
+      cat > /root/services/samba/smb.conf <<'SMBEOF'
       ${local.smb_config}
       SMBEOF
       EOT
@@ -308,7 +313,7 @@ resource "null_resource" "samba_container" {
         --restart=always \
         --network host \
         $ENV_ARGS \
-        -v /tmp/smb.conf:/etc/samba/smb.conf:ro \
+        -v /root/services/samba/smb.conf:/etc/samba/smb.conf:ro \
         $VOL_ARGS \
         ghcr.io/dockur/samba:4.22.6
       EOT
