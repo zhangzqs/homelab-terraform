@@ -25,7 +25,7 @@ output "grafana_admin_user" {
 
 output "vmsingle_url" {
   description = "VMSingle 内部访问地址"
-  value       = "http://vmsingle-victoria-metrics-k8s-stack.${var.vm_namespace}.svc:8429"
+  value       = "http://vmsingle-victoria-metrics-k8s-stack.${var.vm_namespace}.svc:8428"
 }
 
 output "vmalert_url" {

@@ -67,6 +67,10 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
         enabled = true
         spec = {
           replicaCount = 1
+          serviceScrapeSelector = {}
+          serviceScrapeNamespaceSelector = {}
+          staticScrapeSelector = {}
+          staticScrapeNamespaceSelector = {}
           resources = {
             requests = {
               cpu    = "100m"
@@ -80,7 +84,7 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
           # 配置远程写入到 vmsingle
           remoteWrite = [
             {
-              url = "http://vmsingle-victoria-metrics-k8s-stack.${var.vm_namespace}.svc:8429/api/v1/write"
+              url = "http://vmsingle-victoria-metrics-k8s-stack.${var.vm_namespace}.svc:8428/api/v1/write"
             }
           ]
         }
@@ -91,8 +95,10 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
         enabled = var.vmalert_enabled
         spec = {
           replicaCount = 1
+          ruleSelector = {}
+          ruleNamespaceSelector = {}
           datasource = {
-            url = "http://vmsingle-victoria-metrics-k8s-stack.${var.vm_namespace}.svc:8429"
+            url = "http://vmsingle-victoria-metrics-k8s-stack.${var.vm_namespace}.svc:8428"
           }
           notifier = {
             url = "http://vmalertmanager-victoria-metrics-k8s-stack.${var.vm_namespace}.svc:9093"

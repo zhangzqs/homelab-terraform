@@ -76,13 +76,21 @@ resource "null_resource" "setup_nginx" {
   ]
 
   triggers = {
-    lxc_id    = proxmox_virtual_environment_container.nginx_container.id
-    version   = 1
-    file_hash = filesha256("${path.module}/scripts/setup.sh")
+    lxc_id               = proxmox_virtual_environment_container.nginx_container.id
+    version              = 2
+    nginx_package_repo   = var.nginx_package_repo
+    nginx_package_version = var.nginx_package_version
+    file_hash            = sha256(templatefile("${path.module}/scripts/setup.sh", {
+      nginx_package_version = var.nginx_package_version
+      nginx_package_repo    = var.nginx_package_repo
+    }))
   }
 
   provisioner "file" {
-    source      = "${path.module}/scripts/setup.sh"
+    content = templatefile("${path.module}/scripts/setup.sh", {
+      nginx_package_version = var.nginx_package_version
+      nginx_package_repo    = var.nginx_package_repo
+    })
     destination = "/tmp/setup.sh"
 
     connection {
@@ -118,6 +126,7 @@ locals {
   })
 
   setup_systemd_service_command = [
+    "if [ -f ${var.working_dir} ]; then rm -f ${var.working_dir}; fi",
     "mkdir -p ${var.working_dir}/conf.d",
     "mkdir -p ${var.working_dir}/logs",
     "mkdir -p ${var.working_dir}/cache/proxy",
@@ -138,9 +147,10 @@ resource "null_resource" "setup_systemd_service" {
   ]
 
   triggers = {
-    version      = 1
-    service_hash = sha256(local.nginx_service_content)
-    command_hash = sha256(join("", local.setup_systemd_service_command))
+    version       = 2
+    setup_step_id = null_resource.setup_nginx.id
+    service_hash  = sha256(local.nginx_service_content)
+    command_hash  = sha256(join("", local.setup_systemd_service_command))
   }
 
   provisioner "file" {
@@ -178,8 +188,9 @@ resource "null_resource" "deploy_nginx_configs" {
   ]
 
   triggers = {
-    version     = 2
-    config_hash = sha256(each.value)
+    version                  = 3
+    setup_systemd_service_id = null_resource.setup_systemd_service.id
+    config_hash              = sha256(each.value)
   }
 
   provisioner "file" {

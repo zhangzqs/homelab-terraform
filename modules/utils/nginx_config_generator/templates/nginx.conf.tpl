@@ -38,6 +38,10 @@ http {
             vhost_traffic_status_display;
             vhost_traffic_status_display_format html;
         }
+        location /status/format/prometheus {
+            vhost_traffic_status_display;
+            vhost_traffic_status_display_format prometheus;
+        }
     }
 %{ endif }
 %{ if log_format == "json" }

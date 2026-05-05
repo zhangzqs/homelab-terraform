@@ -52,3 +52,15 @@ variable "nginx_configs" {
   description = "从nginx_config_generator模块输出的配置文件映射"
   type        = map(string)
 }
+
+variable "nginx_package_version" {
+  description = "要安装的 nginx-vts Debian 包版本"
+  type        = string
+  default     = "1.28.0"
+}
+
+variable "nginx_package_repo" {
+  description = "提供 nginx-vts Debian 包的 GitHub 仓库"
+  type        = string
+  default     = "zhangzqs/docker-nginx-vts"
+}
