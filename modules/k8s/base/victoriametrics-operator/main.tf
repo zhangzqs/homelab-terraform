@@ -203,8 +203,8 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
         dashboards = {
           default = {
             "proxmox-ve-pve-exporter" = {
-              gnetId    = 24550
-              revision  = 1
+              gnetId     = 24550
+              revision   = 1
               datasource = "VictoriaMetrics"
             }
           }
