@@ -66,11 +66,11 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
       vmagent = {
         enabled = true
         spec = {
-          replicaCount = 1
-          serviceScrapeSelector = {}
+          replicaCount                   = 1
+          serviceScrapeSelector          = {}
           serviceScrapeNamespaceSelector = {}
-          staticScrapeSelector = {}
-          staticScrapeNamespaceSelector = {}
+          staticScrapeSelector           = {}
+          staticScrapeNamespaceSelector  = {}
           resources = {
             requests = {
               cpu    = "100m"
@@ -94,8 +94,8 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
       vmalert = {
         enabled = var.vmalert_enabled
         spec = {
-          replicaCount = 1
-          ruleSelector = {}
+          replicaCount          = 1
+          ruleSelector          = {}
           ruleNamespaceSelector = {}
           datasource = {
             url = "http://vmsingle-victoria-metrics-k8s-stack.${var.vm_namespace}.svc:8428"

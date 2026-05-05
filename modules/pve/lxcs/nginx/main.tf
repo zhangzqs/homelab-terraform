@@ -76,11 +76,11 @@ resource "null_resource" "setup_nginx" {
   ]
 
   triggers = {
-    lxc_id               = proxmox_virtual_environment_container.nginx_container.id
-    version              = 2
-    nginx_package_repo   = var.nginx_package_repo
+    lxc_id                = proxmox_virtual_environment_container.nginx_container.id
+    version               = 2
+    nginx_package_repo    = var.nginx_package_repo
     nginx_package_version = var.nginx_package_version
-    file_hash            = sha256(templatefile("${path.module}/scripts/setup.sh", {
+    file_hash = sha256(templatefile("${path.module}/scripts/setup.sh", {
       nginx_package_version = var.nginx_package_version
       nginx_package_repo    = var.nginx_package_repo
     }))
