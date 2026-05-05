@@ -105,13 +105,13 @@ locals {
     "/tmp/setup.sh",
   ]) : "/tmp/setup.sh"
   backup_script_content = var.backup_target_dir != null ? templatefile("${path.module}/templates/backup.sh.tpl", {
-    upload_location  = var.upload_location
-    db_data_location = var.db_data_location
+    upload_location   = var.upload_location
+    db_data_location  = var.db_data_location
     backup_target_dir = var.backup_target_dir
   }) : ""
   mirror_script_content = var.mirror_target_dir != null ? templatefile("${path.module}/templates/mirror.sh.tpl", {
-    upload_location  = var.upload_location
-    db_data_location = var.db_data_location
+    upload_location   = var.upload_location
+    db_data_location  = var.db_data_location
     mirror_target_dir = var.mirror_target_dir
   }) : ""
   backup_cron_content = var.backup_target_dir != null ? join("\n", [
@@ -152,11 +152,11 @@ resource "null_resource" "setup_container" {
   ]
 
   triggers = {
-    res_vm_id   = proxmox_virtual_environment_container.immich_container.id
-    version     = 1
-    file_hash   = filesha256("${path.module}/scripts/setup.sh")
-    host        = var.ipv4_address
-    working_dir = var.working_dir
+    res_vm_id    = proxmox_virtual_environment_container.immich_container.id
+    version      = 1
+    file_hash    = filesha256("${path.module}/scripts/setup.sh")
+    host         = var.ipv4_address
+    working_dir  = var.working_dir
     proxy_config = sha256(jsonencode(var.install_proxy))
   }
 
@@ -270,7 +270,7 @@ resource "null_resource" "configure_backup" {
   ]
 
   triggers = {
-    res_vm_id         = proxmox_virtual_environment_container.immich_container.id
+    res_vm_id          = proxmox_virtual_environment_container.immich_container.id
     backup_script_hash = sha256(local.backup_script_content)
     backup_cron_hash   = sha256(local.backup_cron_content)
     backup_target_dir  = var.backup_target_dir
@@ -314,7 +314,7 @@ resource "null_resource" "configure_mirror" {
   ]
 
   triggers = {
-    res_vm_id         = proxmox_virtual_environment_container.immich_container.id
+    res_vm_id          = proxmox_virtual_environment_container.immich_container.id
     mirror_script_hash = sha256(local.mirror_script_content)
     mirror_cron_hash   = sha256(local.mirror_cron_content)
     mirror_target_dir  = var.mirror_target_dir
