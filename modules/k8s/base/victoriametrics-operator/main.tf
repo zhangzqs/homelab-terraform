@@ -1,3 +1,14 @@
+resource "random_password" "grafana_admin_password" {
+  count            = var.grafana_admin_password == "" ? 1 : 0
+  length           = 16
+  special          = true
+  override_special = "_%@"
+}
+
+locals {
+  grafana_admin_password = var.grafana_admin_password != "" ? var.grafana_admin_password : random_password.grafana_admin_password[0].result
+}
+
 # 部署 VictoriaMetrics Operator
 resource "helm_release" "victoria_metrics_operator" {
   name             = "victoria-metrics-operator"
@@ -149,7 +160,7 @@ resource "helm_release" "victoria_metrics_k8s_stack" {
       # Grafana - 可视化面板
       grafana = {
         enabled       = true
-        adminPassword = var.grafana_admin_password
+        adminPassword = local.grafana_admin_password
         persistence = var.grafana_storage_enabled ? {
           enabled          = true
           storageClassName = var.vm_storage_class

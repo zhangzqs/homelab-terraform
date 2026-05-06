@@ -23,6 +23,12 @@ output "grafana_admin_user" {
   value       = "admin"
 }
 
+output "grafana_admin_password" {
+  description = "Grafana 管理员密码"
+  value       = local.grafana_admin_password
+  sensitive   = true
+}
+
 output "vmsingle_url" {
   description = "VMSingle 内部访问地址"
   value       = "http://vmsingle-victoria-metrics-k8s-stack.${var.vm_namespace}.svc:8428"

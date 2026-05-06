@@ -47,10 +47,10 @@ variable "alertmanager_storage_size" {
 }
 
 variable "grafana_admin_password" {
-  description = "Grafana 管理员密码"
+  description = "Grafana 管理员密码，留空则自动生成"
   type        = string
   sensitive   = true
-  default     = "admin"
+  default     = ""
 }
 
 variable "grafana_service_type" {
