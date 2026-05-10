@@ -1,15 +1,15 @@
 locals {
-  namespace           = "aria2"
-  app_name            = "aria2"
-  aria_ng_name        = "aria-ng"
-  aria2_deployment    = "aria2"
-  aria_ng_deployment  = "aria-ng"
-  aria2_service       = "aria2-service"
-  aria_ng_service     = "aria-ng-service"
-  config_volume       = "aria2-config"
-  downloads_volume    = "aria2-downloads"
-  config_pvc          = "aria2-config-pvc"
-  downloads_pvc       = "aria2-downloads-pvc"
+  namespace          = "aria2"
+  app_name           = "aria2"
+  aria_ng_name       = "aria-ng"
+  aria2_deployment   = "aria2"
+  aria_ng_deployment = "aria-ng"
+  aria2_service      = "aria2-service"
+  aria_ng_service    = "aria-ng-service"
+  config_volume      = "aria2-config"
+  downloads_volume   = "aria2-downloads"
+  config_pvc         = "aria2-config-pvc"
+  downloads_pvc      = "aria2-downloads-pvc"
 }
 
 # Namespace
@@ -29,14 +29,14 @@ resource "kubernetes_config_map_v1" "aria2_config" {
   }
 
   data = {
-    UMASK_SET      = "022"
-    RPC_SECRET     = var.aria2_rpc_secret
-    RPC_PORT       = "6800"
-    LISTEN_PORT    = "6888"
-    DISK_CACHE     = var.aria2_disk_cache
-    IPV6_MODE      = "false"
+    UMASK_SET       = "022"
+    RPC_SECRET      = var.aria2_rpc_secret
+    RPC_PORT        = "6800"
+    LISTEN_PORT     = "6888"
+    DISK_CACHE      = var.aria2_disk_cache
+    IPV6_MODE       = "false"
     UPDATE_TRACKERS = "true"
-    TZ             = var.aria2_timezone
+    TZ              = var.aria2_timezone
   }
 }
 
@@ -189,24 +189,24 @@ resource "kubernetes_service_v1" "aria2" {
     type = "ClusterIP"
 
     port {
-      name       = "rpc"
-      port       = 6800
+      name        = "rpc"
+      port        = 6800
       target_port = 6800
-      protocol   = "TCP"
+      protocol    = "TCP"
     }
 
     port {
-      name       = "bt-listen"
-      port       = 6888
+      name        = "bt-listen"
+      port        = 6888
       target_port = 6888
-      protocol   = "TCP"
+      protocol    = "TCP"
     }
 
     port {
-      name       = "bt-dht"
-      port       = 6888
+      name        = "bt-dht"
+      port        = 6888
       target_port = 6888
-      protocol   = "UDP"
+      protocol    = "UDP"
     }
 
     selector = {
