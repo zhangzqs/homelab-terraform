@@ -22,13 +22,13 @@ variable "pvc_storage_class_name" {
 variable "aria2_image" {
   description = "aria2 Docker 镜像"
   type        = string
-  default     = "p3terx/aria2-pro:latest"
+  default     = "xujinkai/aria2-with-webui:latest"
 }
 
 variable "aria_ng_image" {
   description = "aria-ng Docker 镜像"
   type        = string
-  default     = "p3terx/ariang:latest"
+  default     = "wahyd4/aria2-ui:latest"
 }
 
 variable "aria2_config_storage_size" {

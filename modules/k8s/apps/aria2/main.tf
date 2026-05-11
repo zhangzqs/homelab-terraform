@@ -336,3 +336,51 @@ resource "kubernetes_manifest" "aria_ng_httproute" {
     }
   }
 }
+
+# HTTPRoute for aria2 RPC endpoint
+resource "kubernetes_manifest" "aria2_rpc_httproute" {
+  depends_on = [
+    kubernetes_service_v1.aria2,
+    kubernetes_namespace_v1.namespace
+  ]
+
+  manifest = {
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "HTTPRoute"
+
+    metadata = {
+      name      = "aria2-rpc-route"
+      namespace = local.namespace
+    }
+
+    spec = {
+      hostnames = [var.httproute_hostname]
+
+      parentRefs = [
+        {
+          name      = var.gateway_name
+          namespace = var.gateway_namespace
+        }
+      ]
+
+      rules = [
+        {
+          matches = [
+            {
+              path = {
+                type  = "PathPrefix"
+                value = "/rpc"
+              }
+            }
+          ]
+          backendRefs = [
+            {
+              name = local.aria2_service
+              port = 6800
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

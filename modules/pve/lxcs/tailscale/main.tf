@@ -44,6 +44,10 @@ resource "proxmox_virtual_environment_container" "tailscale_container" {
         address = "${var.ipv4_address}/${var.ipv4_address_cidr}"
         gateway = var.ipv4_gateway
       }
+
+      ipv6 {
+        address = "auto"
+      }
     }
 
     user_account {
