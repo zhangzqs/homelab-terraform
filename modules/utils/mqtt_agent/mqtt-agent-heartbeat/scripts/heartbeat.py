@@ -17,45 +17,14 @@ import json
 import sys
 import time
 import traceback
-import ssl
-import subprocess
-import venv
-import os
-import tempfile
+
 from pathlib import Path
 
-# Setup shared module path - go up from scripts to heartbeat module, then up to modules, then to shared
-shared_path = str(Path(__file__).parent.parent.parent / 'shared')
-if shared_path not in sys.path:
-    sys.path.insert(0, shared_path)
+SHARED_DIR = Path(__file__).resolve().parents[2] / "shared"
+if str(SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(SHARED_DIR))
 
-# Download/import paho-mqtt
-try:
-    import paho.mqtt.client as mqtt
-except ImportError:
-    print("paho-mqtt not found, creating venv...", file=sys.stderr)
-    sys.stderr.flush()
-    
-    venv_dir = Path(os.getenv("MQTT_HEARTBEAT_VENV", Path.home() / ".cache" / "mqtt-heartbeat-venv"))
-    python_bin = venv_dir / "bin" / "python"
-    
-    if not python_bin.exists():
-        builder = venv.EnvBuilder(with_pip=True)
-        builder.create(venv_dir)
-    
-    subprocess.run([str(python_bin), "-m", "pip", "install", "--upgrade", "--quiet", "paho-mqtt"], 
-                   check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    
-    site_packages = next((venv_dir / "lib").glob("python*/site-packages"))
-    sys.path.insert(0, str(site_packages))
-    
-    # Re-ensure shared path is at front (go up from scripts to heartbeat module, then up to modules, then to shared)
-    shared_path_fixed = str(Path(__file__).parent.parent.parent / 'shared')
-    if shared_path_fixed in sys.path:
-        sys.path.remove(shared_path_fixed)
-    sys.path.insert(0, shared_path_fixed)
-    
-    import paho.mqtt.client as mqtt
+import mqtt_light as mqtt
 
 from mqtt_crypto import unpack_message
 
@@ -101,22 +70,12 @@ def main():
             print(f"Error processing heartbeat: {e}", file=sys.stderr)
             traceback.print_exc(file=sys.stderr)
     
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, client_id="terraform-heartbeat-waiter")
+    client = mqtt.Client(client_id="terraform-heartbeat-waiter")
     client.on_connect = on_connect
     client.on_message = on_message
-    
-    # Write PEM content to temporary files
-    tmpdir = tempfile.mkdtemp()
-    
-    cert_file = Path(tmpdir) / "terraform.crt"
-    cert_file.write_text(terraform_certificate_pem)
-    
-    key_file = Path(tmpdir) / "terraform.key"
-    key_file.write_text(terraform_private_key_pem)
-    
+
     # Setup TLS
-    client.tls_set(ca_certs=None, certfile=str(cert_file), keyfile=str(key_file),
-                   cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+    client.tls_set()
     client.tls_insecure_set(True)
     
     try:

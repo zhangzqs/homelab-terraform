@@ -9,7 +9,6 @@ import os
 import sys
 import threading
 import time
-import venv
 from pathlib import Path
 from typing import Any
 
@@ -17,30 +16,8 @@ SHARED_DIR = Path(__file__).resolve().parents[2] / "shared"
 if str(SHARED_DIR) not in sys.path:
     sys.path.insert(0, str(SHARED_DIR))
 
+import mqtt_light as mqtt
 from mqtt_crypto import pack_message, unpack_message
-
-
-def _load_mqtt_client():
-    try:
-        import paho.mqtt.client as mqtt  # type: ignore
-
-        return mqtt
-    except ModuleNotFoundError:
-        venv_dir = Path(os.getenv("MQTT_EXEC_VENV", Path.home() / ".cache" / "mqtt-instance-venv"))
-        python_bin = venv_dir / "bin" / "python"
-        if not python_bin.exists():
-            builder = venv.EnvBuilder(with_pip=True)
-            builder.create(venv_dir)
-        subprocess_args = [str(python_bin), "-m", "pip", "install", "--upgrade", "--quiet", "paho-mqtt"]
-        import subprocess
-
-        subprocess.run(subprocess_args, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        site_packages = next((venv_dir / "lib").glob("python*/site-packages"))
-        if str(site_packages) not in sys.path:
-            sys.path.insert(0, str(site_packages))
-        import paho.mqtt.client as mqtt  # type: ignore
-
-        return mqtt
 
 
 def _read_query() -> dict[str, Any]:
@@ -60,7 +37,6 @@ def _iso(value: dt.datetime) -> str:
 
 def main() -> int:
     query = _read_query()
-    mqtt = _load_mqtt_client()
     broker_host = query["broker_host"]
     broker_port = int(query["broker_port"])
     topic_prefix = query["topic_prefix"]

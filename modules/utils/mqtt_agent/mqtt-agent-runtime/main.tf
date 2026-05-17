@@ -1,10 +1,30 @@
-locals {
-  shared_py = file("${path.module}/../shared/mqtt_crypto.py")
-  agent_py  = file("${path.module}/scripts/agent.py")
+data "archive_file" "runtime_payload" {
+  type        = "zip"
+  output_path = "${path.root}/.terraform/runtime-payload.zip"
 
+  source {
+    content  = file("${path.module}/scripts/agent.py")
+    filename = "agent.py"
+  }
+
+  source {
+    content  = file("${path.module}/../shared/mqtt_crypto.py")
+    filename = "mqtt_crypto.py"
+  }
+
+  source {
+    content  = file("${path.module}/../shared/mqtt_light.py")
+    filename = "mqtt_light.py"
+  }
+}
+
+data "local_file" "runtime_payload_b64" {
+  filename = data.archive_file.runtime_payload.output_path
+}
+
+locals {
   rendered = templatefile("${path.module}/templates/user-data.sh", {
-    shared_py                 = local.shared_py
-    agent_py                  = local.agent_py
+    runtime_payload_tar_b64   = data.local_file.runtime_payload_b64.content_base64
     broker_host               = var.mqtt_config.broker_host
     broker_port               = var.mqtt_config.broker_port
     topic_prefix              = var.mqtt_config.topic_prefix

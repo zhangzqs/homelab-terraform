@@ -7,6 +7,7 @@ import datetime as dt
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -14,7 +15,11 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
-import paho.mqtt.client as mqtt
+SHARED_DIR = Path("/opt/mqtt-agent")
+if str(SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(SHARED_DIR))
+
+import mqtt_light as mqtt
 
 from mqtt_crypto import pack_message, unpack_message
 
@@ -150,11 +155,7 @@ def main() -> int:
     executor = ThreadPoolExecutor(max_workers=max_workers)
     heartbeat_stop = threading.Event()
 
-    client = mqtt.Client(
-        mqtt.CallbackAPIVersion.VERSION1,
-        client_id=f"mqtt-agent-{instance_id}",
-        clean_session=True,
-    )
+    client = mqtt.Client(client_id=f"mqtt-agent-{instance_id}", clean_session=True)
     client.tls_set()
 
     def publish_result(payload: dict[str, Any]) -> None:
