@@ -1,0 +1,84 @@
+(function() {
+  var key = "AriaNg.Options";
+  var host = window.location.hostname;
+  var protocol = window.location.protocol === "https:" ? "https" : "http";
+  var port = window.location.port || (protocol === "https" ? "443" : "80");
+  var encodedSecret = "${aria2_rpc_secret_base64}";
+  var defaultOptions = {
+    language: ((navigator.language || "en").split("-")[0] || "en").toLowerCase(),
+    theme: "light",
+    title: "$${downspeed}, $${upspeed} - $${title}",
+    titleRefreshInterval: 5000,
+    browserNotification: false,
+    browserNotificationSound: true,
+    browserNotificationFrequency: "unlimited",
+    rpcAlias: "",
+    rpcHost: host,
+    rpcPort: port,
+    rpcInterface: "jsonrpc",
+    protocol: protocol,
+    httpMethod: "POST",
+    rpcRequestHeaders: "",
+    secret: encodedSecret,
+    extendRpcServers: [],
+    webSocketReconnectInterval: 5000,
+    globalStatRefreshInterval: 1000,
+    downloadTaskRefreshInterval: 1000,
+    keyboardShortcuts: true,
+    swipeGesture: true,
+    dragAndDropTasks: true,
+    rpcListDisplayOrder: "recentlyUsed",
+    afterCreatingNewTask: "task-list",
+    removeOldTaskAfterRetrying: false,
+    confirmTaskRemoval: true,
+    includePrefixWhenCopyingFromTaskDetails: true,
+    showPiecesInfoInTaskDetailPage: "le10240",
+    afterRetryingTask: "task-list-downloading",
+    taskListIndependentDisplayOrder: false,
+    displayOrder: "default:asc",
+    waitingTaskListPageDisplayOrder: "default:asc",
+    stoppedTaskListPageDisplayOrder: "default:asc",
+    fileListDisplayOrder: "default:asc",
+    peerListDisplayOrder: "default:asc"
+  };
+  var raw = window.localStorage.getItem(key);
+  var parsedOptions = raw ? JSON.parse(raw) : {};
+  var options = Object.assign({}, defaultOptions, parsedOptions);
+  var changed = false;
+
+  if (!options.rpcHost) {
+    options.rpcHost = host;
+    changed = true;
+  }
+
+  if (options.rpcHost === host) {
+    if (options.protocol !== protocol) {
+      options.protocol = protocol;
+      changed = true;
+    }
+
+    if (String(options.rpcPort || "") !== String(port)) {
+      options.rpcPort = port;
+      changed = true;
+    }
+
+    if (options.rpcInterface !== "jsonrpc") {
+      options.rpcInterface = "jsonrpc";
+      changed = true;
+    }
+
+    if (options.httpMethod !== "POST") {
+      options.httpMethod = "POST";
+      changed = true;
+    }
+
+    if (options.secret !== encodedSecret) {
+      options.secret = encodedSecret;
+      changed = true;
+    }
+  }
+
+  if (changed || !raw) {
+    window.localStorage.setItem(key, JSON.stringify(options));
+  }
+})();

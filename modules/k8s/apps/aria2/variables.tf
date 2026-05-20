@@ -1,5 +1,5 @@
 variable "httproute_hostname" {
-  description = "HTTPRoute 访问域名"
+  description = "aria2 UI HTTPRoute 访问域名"
   type        = string
 }
 
@@ -26,9 +26,21 @@ variable "aria2_image" {
 }
 
 variable "aria_ng_image" {
-  description = "aria-ng Docker 镜像"
+  description = "aria-ng 静态资源镜像"
   type        = string
-  default     = "wahyd4/aria2-ui:latest"
+  default     = "p3terx/ariang:latest"
+}
+
+variable "aria_ng_proxy_image" {
+  description = "aria-ng 代理镜像"
+  type        = string
+  default     = "nginx:1.27-alpine"
+}
+
+variable "aria_ng_upstream_port" {
+  description = "aria-ng 静态资源容器端口"
+  type        = number
+  default     = 6880
 }
 
 variable "aria2_config_storage_size" {
