@@ -30,9 +30,9 @@ resource "kubernetes_deployment_v1" "kms_app" {
 
       spec {
         init_container {
-          name              = "fix-permissions"
-          image             = "busybox:1.36"
-          command           = ["sh", "-c", "chown -R 1000:1000 /kms/var"]
+          name    = "fix-permissions"
+          image   = "busybox:1.36"
+          command = ["sh", "-c", "chown -R 1000:1000 /kms/var"]
 
           volume_mount {
             name       = local.kms_var_pvc_name
