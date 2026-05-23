@@ -58,3 +58,17 @@ module "drawio" {
   gateway_name       = module.gateway.gateway_name
   gateway_namespace  = module.gateway.gateway_namespace
 }
+
+module "kms" {
+  source = "../apps/kms"
+
+  providers = {
+    kubernetes = kubernetes
+  }
+
+  httproute_hostname     = "kms.${var.httproute_base_hostname}"
+  gateway_name           = module.gateway.gateway_name
+  gateway_namespace      = module.gateway.gateway_namespace
+  pvc_storage_class_name = module.nfs_storage_class.storage_class_name
+}
+

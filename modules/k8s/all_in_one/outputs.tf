@@ -5,6 +5,8 @@ output "service_name_list" {
     "plantuml",
     "vaultwarden",
     "it-tools",
-    "drawio"
+    "drawio",
+    "grafana",
+    "kms",
   ]
 }
