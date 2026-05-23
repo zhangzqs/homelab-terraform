@@ -1,0 +1,16 @@
+listen: ${listen}
+
+acme:
+  domains:
+    - ${domain}
+  email: ${email}
+
+auth:
+  type: password
+  password: ${password}
+
+masquerade:
+  type: proxy
+  proxy:
+    url: ${masquerade}
+    rewriteHost: true
