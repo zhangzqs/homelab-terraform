@@ -1,11 +1,25 @@
 variable "proxy_providers" {
   description = "代理提供者配置（完全自定义，对应 mihomo proxy-providers 字段）"
   type        = any
-  default     = {}
+  default = {
+    # 订阅地址示例（需替换为实际可用的订阅地址）：
+    # provider1 = {
+    #   type     = "http"
+    #   url      = "https://example.com/path/to/your/subscription"
+    #   interval = 3600
+    #   path     = "./proxies/provider1.yaml"
+    # }
+  }
 }
 
 variable "proxy_groups" {
   description = "代理组配置（完全自定义，对应 mihomo proxy-groups 字段）"
+  type        = any
+  default     = []
+}
+
+variable "proxies" {
+  description = "代理服务器配置（完全自定义，对应 mihomo proxies 字段）"
   type        = any
   default     = []
 }

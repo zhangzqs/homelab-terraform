@@ -190,9 +190,18 @@ resource "null_resource" "update_mihomo_config" {
     }
 
     inline = [
-      "systemctl restart mihomo.service",
-      "sleep 2",
-      "systemctl status mihomo.service --no-pager || true",
+      "systemctl stop mihomo.service 2>/dev/null || true",
+      "sleep 1",
+      ": > ${var.working_dir}/mihomo.log 2>/dev/null || true",
+      "systemctl start mihomo.service",
+      "sleep 3",
+      "if systemctl is-active --quiet mihomo.service; then",
+      "  echo 'mihomo started successfully'",
+      "else",
+      "  echo 'mihomo failed to start, last 30 lines of log:'",
+      "  tail -30 ${var.working_dir}/mihomo.log 2>/dev/null || true",
+      "  exit 1",
+      "fi",
     ]
   }
 }
