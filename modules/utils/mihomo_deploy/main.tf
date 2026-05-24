@@ -1,10 +1,10 @@
 locals {
   # 共享 SSH 连接信息（需存入 triggers_replace 供 destroy provisioner 使用）
   ssh_triggers = {
-    ssh_host        = var.ssh_host
-    ssh_port        = tostring(var.ssh_port)
-    ssh_user        = var.ssh_user
-    ssh_password    = var.ssh_password != null ? var.ssh_password : ""
+    ssh_host     = var.ssh_host
+    ssh_port     = tostring(var.ssh_port)
+    ssh_user     = var.ssh_user
+    ssh_password = var.ssh_password != null ? var.ssh_password : ""
     ssh_private_key = var.ssh_private_key != null ? (
       fileexists(var.ssh_private_key) ? file(var.ssh_private_key) : var.ssh_private_key
     ) : ""
