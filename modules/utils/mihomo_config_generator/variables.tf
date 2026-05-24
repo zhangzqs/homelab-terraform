@@ -1,67 +1,62 @@
-variable "working_dir" {
-  description = "工作目录"
-  type        = string
-  default     = "/root/mihomo"
-
-  validation {
-    condition     = can(regex("^/", var.working_dir))
-    error_message = "工作目录必须是绝对路径（以 / 开头）"
-  }
-}
-
-variable "mixed_port" {
-  description = "混合代理端口"
-  type        = number
-  default     = 7890
-
-  validation {
-    condition     = var.mixed_port > 0 && var.mixed_port <= 65535
-    error_message = "端口号必须在 1-65535 之间"
-  }
-}
-
 variable "proxy_providers" {
-  description = "机场订阅列表"
-  type = map(object({
-    url      = string
-    interval = optional(number, 3600)
-  }))
-  default = {}
+  description = "代理提供者配置（完全自定义，对应 mihomo proxy-providers 字段）"
+  type        = any
+  default     = {}
+}
+
+variable "proxy_groups" {
+  description = "代理组配置（完全自定义，对应 mihomo proxy-groups 字段）"
+  type        = any
+  default     = []
+}
+
+variable "extra_rule_providers" {
+  description = "额外的规则集提供者，会追加到内置默认规则集之后（对应 mihomo rule-providers 字段）"
+  type        = any
+  default     = {}
+}
+
+variable "overseas_proxy_name" {
+  description = "海外代理组名称，内置规则中需要走代理时引用此名称"
+  type        = string
 
   validation {
-    condition     = alltrue([for k, v in var.proxy_providers : can(regex("^https?://", v.url))])
-    error_message = "所有订阅 URL 必须以 http:// 或 https:// 开头"
-  }
-
-  validation {
-    condition     = alltrue([for k, v in var.proxy_providers : v.interval == null || (v.interval > 0 && v.interval <= 86400)])
-    error_message = "更新间隔必须在 1-86400 秒之间（最多 24 小时）"
+    condition     = length(var.overseas_proxy_name) > 0
+    error_message = "overseas_proxy_name 不能为空"
   }
 }
 
-variable "custom_proxies" {
-  description = "自定义代理节点列表"
-  type = map(object({
-    type     = string
-    server   = string
-    port     = number
-    password = string
-    # 可以根据需要添加更多字段
-  }))
-  default = {}
+variable "external_controller" {
+  description = "RESTful API 监听地址"
+  type        = string
+  default     = "127.0.0.1:9093"
+}
+
+variable "default_rule_target" {
+  description = "MATCH 兜底规则的目标（通常是代理组名称或 DIRECT/REJECT）"
+  type        = string
+  default     = "DIRECT"
 
   validation {
-    condition     = alltrue([for k, v in var.custom_proxies : v.port > 0 && v.port <= 65535])
-    error_message = "所有代理端口必须在 1-65535 之间"
+    condition     = length(var.default_rule_target) > 0
+    error_message = "default_rule_target 不能为空"
   }
+}
 
-  validation {
-    condition     = alltrue([for k, v in var.custom_proxies : length(v.password) > 0])
-    error_message = "代理密码不能为空"
-  }
+variable "extra_rules_before" {
+  description = "追加在内置规则之前的额外规则列表"
+  type        = any
+  default     = []
+}
 
-  validation {
-    condition     = alltrue([for k, v in var.custom_proxies : contains(["hysteria2", "vmess", "vless", "trojan", "ss", "ssr"], v.type)])
-    error_message = "代理类型必须是支持的类型之一：hysteria2, vmess, vless, trojan, ss, ssr"
-  }
+variable "extra_rules_after" {
+  description = "追加在内置规则之后的额外规则列表"
+  type        = any
+  default     = []
+}
+
+variable "listeners" {
+  description = "监听器配置（完全自定义，对应 mihomo listeners 字段）"
+  type        = any
+  default     = []
 }
