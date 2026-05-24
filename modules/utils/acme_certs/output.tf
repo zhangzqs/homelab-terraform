@@ -7,4 +7,5 @@ output "nginx_ssl_certificate" {
 output "nginx_ssl_certificate_key" {
   value       = acme_certificate.certificate.private_key_pem
   description = "SSL证书私钥, 给nginx使用"
+  sensitive   = true
 }
