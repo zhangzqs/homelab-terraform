@@ -33,12 +33,18 @@ CI 会对所有包含 `.tf` 文件的目录执行 `terraform init -backend=false
 
 ## 约定
 
-- Terraform 版本：1.12
+- Terraform 版本：1.14
 - 模块被外部引用时通过 `github.com/zhangzqs/homelab-terraform//modules/...?ref=master` 格式
 - LXC 模块统一使用 `variables.tf` 中的 `pve_*` 变量连接 PVE API
 - K8s 模块通过 `k8s_api_server`、`k8s_cluster_ca_certificate` 等变量接收集群连接信息
 - 变量描述使用中文
 - Git 提交信息遵循 Conventional Commits：`feat(scope): ...`、`fix(scope): ...`、`docs(scope): ...`
+
+### Terraform 编码
+
+- 优先使用 `terraform_data`（内置）替代 `null_resource`，减少 provider 依赖
+- module `source` 必须使用纯相对路径，不能包含 `${path.module}` 等插值（Terraform 1.14+ 要求）
+- destroy provisioner 中引用变量必须通过 `self` 引用，不能直接引用 `var.*`
 
 ## README
 

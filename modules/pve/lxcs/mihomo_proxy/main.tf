@@ -9,7 +9,7 @@ resource "tls_private_key" "container_key" {
 }
 
 resource "terraform_data" "container_replacer" {
-  triggers_replace = 1 // 当这个字段发生改变，会触发依赖它的资源重新创建
+  triggers_replace = 1 # 当这个字段发生改变，会触发依赖它的资源重新创建
 }
 
 resource "proxmox_virtual_environment_container" "mihomo_proxy_container" {
@@ -69,139 +69,22 @@ resource "proxmox_virtual_environment_container" "mihomo_proxy_container" {
   }
 }
 
+module "mihomo_deploy" {
+  source = "../../../utils/mihomo_deploy"
 
-resource "null_resource" "setup_container" {
+  ssh_host        = var.ipv4_address
+  ssh_user        = "root"
+  ssh_private_key = tls_private_key.container_key.private_key_pem
+
+  working_dir           = var.working_dir
+  mihomo_config_content = var.mihomo_config_content
+
+  # 容器重建时重新触发安装和配置
+  extra_triggers = {
+    container_id = proxmox_virtual_environment_container.mihomo_proxy_container.id
+  }
+
   depends_on = [
     proxmox_virtual_environment_container.mihomo_proxy_container
   ]
-
-  triggers = {
-    lxc_id    = proxmox_virtual_environment_container.mihomo_proxy_container.id
-    version   = 1
-    file_hash = filesha256("${path.module}/scripts/setup.sh")
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/scripts/setup.sh"
-    destination = "/tmp/setup.sh"
-
-    connection {
-      type        = "ssh"
-      user        = "root"
-      host        = var.ipv4_address
-      private_key = tls_private_key.container_key.private_key_pem
-      timeout     = "2m"
-    }
-  }
-
-  provisioner "remote-exec" {
-    connection {
-      type        = "ssh"
-      user        = "root"
-      host        = var.ipv4_address
-      private_key = tls_private_key.container_key.private_key_pem
-      timeout     = "2m"
-    }
-
-    inline = [
-      "chmod +x /tmp/setup.sh",
-      "/tmp/setup.sh",
-      "rm -f /tmp/setup.sh",
-    ]
-  }
-}
-
-locals {
-  mihomo_service_content = templatefile("${path.module}/templates/mihomo.service.tpl", {
-    working_dir = var.working_dir,
-  })
-}
-
-resource "null_resource" "setup_systemd_service" {
-  depends_on = [
-    null_resource.setup_container
-  ]
-
-  triggers = {
-    version      = 1
-    service_hash = sha256(local.mihomo_service_content)
-  }
-
-  provisioner "file" {
-    content     = local.mihomo_service_content
-    destination = "/etc/systemd/system/mihomo.service"
-
-    connection {
-      type        = "ssh"
-      user        = "root"
-      host        = var.ipv4_address
-      private_key = tls_private_key.container_key.private_key_pem
-      timeout     = "2m"
-    }
-  }
-
-  provisioner "remote-exec" {
-    connection {
-      type        = "ssh"
-      user        = "root"
-      host        = var.ipv4_address
-      private_key = tls_private_key.container_key.private_key_pem
-      timeout     = "2m"
-    }
-
-    inline = [
-      "mkdir -p ${var.working_dir}",
-      "systemctl daemon-reload",
-      "systemctl enable mihomo.service",
-    ]
-  }
-}
-
-resource "null_resource" "update_mihomo_config" {
-  depends_on = [
-    null_resource.setup_systemd_service
-  ]
-
-  triggers = {
-    version     = 1
-    config_hash = sha256(var.mihomo_config_content)
-  }
-
-  provisioner "file" {
-    content     = var.mihomo_config_content
-    destination = "${var.working_dir}/config.yaml"
-
-    connection {
-      type        = "ssh"
-      user        = "root"
-      host        = var.ipv4_address
-      private_key = tls_private_key.container_key.private_key_pem
-      timeout     = "2m"
-    }
-  }
-
-  provisioner "remote-exec" {
-    connection {
-      type        = "ssh"
-      user        = "root"
-      host        = var.ipv4_address
-      private_key = tls_private_key.container_key.private_key_pem
-      timeout     = "2m"
-    }
-
-    inline = [
-      "systemctl stop mihomo.service 2>/dev/null || true",
-      "sleep 1",
-      ": > ${var.working_dir}/mihomo.log 2>/dev/null || true",
-      "systemctl start mihomo.service",
-      "sleep 3",
-      "if systemctl is-active --quiet mihomo.service; then",
-      "  echo 'mihomo started successfully'",
-      "else",
-      "  echo 'mihomo failed to start, last 30 lines of log:'",
-      "  tail -30 ${var.working_dir}/mihomo.log 2>/dev/null || true",
-      "  exit 1",
-      "fi",
-    ]
-  }
 }
