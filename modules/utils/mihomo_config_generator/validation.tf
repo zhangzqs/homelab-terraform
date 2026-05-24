@@ -9,27 +9,27 @@ resource "terraform_data" "validate_proxy_sources" {
 
 check "config_validation" {
   assert {
-    condition     = contains(keys(local.config_parsed), "mode")
+    condition     = contains(keys(local.config), "mode")
     error_message = "生成的配置缺少 'mode' 字段"
   }
 
   assert {
-    condition     = contains(keys(local.config_parsed), "listeners")
+    condition     = contains(keys(local.config), "listeners")
     error_message = "生成的配置缺少 'listeners' 字段"
   }
 
   assert {
-    condition     = contains(keys(local.config_parsed), "rules")
+    condition     = contains(keys(local.config), "rules")
     error_message = "生成的配置缺少 'rules' 字段"
   }
 
   assert {
-    condition     = contains(keys(local.config_parsed), "proxy-groups")
+    condition     = contains(keys(local.config), "proxy-groups")
     error_message = "生成的配置缺少 'proxy-groups' 字段"
   }
 
   assert {
-    condition     = try(length(local.config_parsed["proxy-groups"]), 0) > 0
+    condition     = try(length(local.config["proxy-groups"]), 0) > 0
     error_message = "至少需要一个代理组"
   }
 }
