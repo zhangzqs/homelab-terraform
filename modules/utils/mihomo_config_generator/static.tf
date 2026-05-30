@@ -1,6 +1,16 @@
 locals {
+  default_dns_config = {
+    "enable"         = true
+    "listen"         = "0.0.0.0:53"
+    "enhanced-mode"  = "fake-ip"
+    "fake-ip-filter" = ["*.lan", "+.local"]
+    "nameserver"     = ["223.5.5.5", "119.29.29.29"]
+  }
+
   static_config = {
     "mode" = "rule"
+
+    "dns" = merge(local.default_dns_config, var.dns_config)
 
     "geox-url" = {
       "geoip"   = "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat"

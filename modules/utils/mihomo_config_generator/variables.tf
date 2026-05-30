@@ -74,3 +74,9 @@ variable "listeners" {
   type        = any
   default     = []
 }
+
+variable "dns_config" {
+  description = "DNS 配置扩展（会与默认配置 merge，对应 mihomo dns 字段）"
+  type        = any
+  default     = {}
+}
