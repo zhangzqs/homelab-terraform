@@ -1,0 +1,18 @@
+[connection]
+id=Home Assistant Static
+type=ethernet
+autoconnect=true
+autoconnect-priority=100
+
+[ethernet]
+
+[ipv4]
+method=manual
+addresses=${ipv4_address}/${ipv4_cidr}
+gateway=${ipv4_gateway}
+dns=${ipv4_dns}
+
+[ipv6]
+method=auto
+
+[proxy]
