@@ -118,3 +118,15 @@ variable "download_proxy" {
   })
   default = null
 }
+
+variable "trusted_proxies" {
+  description = "HA configuration.yaml 的 http.trusted_proxies 列表（CIDR 或单 IP）。非空时模块会通过 qm guest exec 把 `http.use_x_forwarded_for + trusted_proxies` 写到 HA 配置；用于走 nginx 反代访问 HA 的场景。onboarding 未完成时该步骤会静默跳过，重跑 apply 即生效。"
+  type        = list(string)
+  default     = []
+}
+
+variable "ha_config_path" {
+  description = "HA configuration.yaml 在 HAOS 内部的路径"
+  type        = string
+  default     = "/mnt/data/supervisor/homeassistant/configuration.yaml"
+}

@@ -14,6 +14,8 @@
 //   2. 创建 VM
 //   3. 通过 qm guest exec 让 HAOS 内部把出厂 `Supervisor <iface>` 连接
 //      改成 manual + 静态 IP，并重新激活
+//   4. （可选）通过 qm guest exec 给 HA configuration.yaml 注入
+//      http.use_x_forwarded_for + trusted_proxies，让 nginx 反代能正常工作
 // =============================================================================
 
 // SSH 连接参数（多个资源复用，写在一起避免漂移）
@@ -29,10 +31,23 @@ locals {
 //    bpg/proxmox 0.93.0 的 download_file 不支持 xz 解压算法，
 //    HAOS 官方发布只提供 .qcow2.xz，所以走 SSH 在宿主机侧下载。
 // =============================================================================
+locals {
+  download_haos_image_script = templatefile(
+    "${path.module}/scripts/download_haos_image.sh.tpl",
+    {
+      haos_version           = var.haos_version
+      download_proxy_enabled = var.download_proxy != null
+      http_proxy             = var.download_proxy != null ? var.download_proxy.http_proxy : ""
+      https_proxy            = var.download_proxy != null ? var.download_proxy.https_proxy : ""
+    }
+  )
+}
+
 resource "terraform_data" "haos_image_prepare" {
   triggers_replace = {
     haos_version = var.haos_version
     datastore_id = var.haos_image_datastore_id
+    script_hash  = sha256(local.download_haos_image_script)
   }
 
   connection {
@@ -44,21 +59,7 @@ resource "terraform_data" "haos_image_prepare" {
   }
 
   provisioner "remote-exec" {
-    inline = [
-      "set -euo pipefail",
-      var.download_proxy == null ? "true" : "export http_proxy='${var.download_proxy.http_proxy}'",
-      var.download_proxy == null ? "true" : "export https_proxy='${var.download_proxy.https_proxy}'",
-      "TARGET_DIR=/var/lib/vz/import",
-      "mkdir -p \"$TARGET_DIR\"",
-      "TARGET_FILE=\"$TARGET_DIR/haos_ova-${self.triggers_replace.haos_version}.qcow2\"",
-      "if [ ! -f \"$TARGET_FILE\" ]; then",
-      "  TMP_XZ=\"$TARGET_DIR/haos_ova-${self.triggers_replace.haos_version}.qcow2.xz\"",
-      "  rm -f \"$TMP_XZ\"",
-      "  wget --tries=3 --timeout=60 -O \"$TMP_XZ\" 'https://github.com/home-assistant/operating-system/releases/download/${self.triggers_replace.haos_version}/haos_ova-${self.triggers_replace.haos_version}.qcow2.xz'",
-      "  unxz \"$TMP_XZ\"",
-      "fi",
-      "ls -lh \"$TARGET_FILE\"",
-    ]
+    inline = [local.download_haos_image_script]
   }
 }
 
@@ -149,62 +150,90 @@ resource "proxmox_virtual_environment_vm" "home_assistant" {
 
 // =============================================================================
 // 3. 通过 qm guest exec 给 HAOS 注入静态 IP
-//    HAOS 出厂自带一个 `Supervisor <iface>` NetworkManager 连接（DHCP），
-//    我们用 `nmcli con modify` 把它改成 manual + 我们的 IP，再重新激活。
-//    比往 LABEL=CONFIG 卷拷文件更可靠：
-//      - hassos-config 拷贝完成后，HA Supervisor 仍可能经 DBus 重置回 DHCP
-//      - 直接改活跃连接，立即生效，不需要重启
 // =============================================================================
+locals {
+  configure_static_ip_script = templatefile(
+    "${path.module}/scripts/configure_static_ip.sh.tpl",
+    {
+      vm_id          = var.vm_id
+      interface_name = var.interface_name
+      ipv4_address   = var.ipv4_address
+      ipv4_cidr      = var.ipv4_address_cidr
+      ipv4_gateway   = var.ipv4_gateway
+      // nmcli ipv4.dns 用逗号分隔，模板里是分号给 keyfile 用
+      ipv4_dns_csv = replace(var.ipv4_dns, ";", ",")
+    }
+  )
+}
+
 resource "terraform_data" "configure_static_ip" {
   depends_on = [proxmox_virtual_environment_vm.home_assistant]
 
   triggers_replace = {
-    vm_id          = var.vm_id
-    interface_name = var.interface_name
-    ipv4_address   = var.ipv4_address
-    ipv4_cidr      = var.ipv4_address_cidr
-    ipv4_gateway   = var.ipv4_gateway
-    // nmcli ipv4.dns 用逗号分隔，模板里是分号给 keyfile 用
-    ipv4_dns_csv = replace(var.ipv4_dns, ";", ",")
-    ssh_host     = local.pve_ssh_host
-    ssh_port     = local.pve_ssh_port
-    ssh_user     = local.pve_ssh_user
-    ssh_password = local.pve_ssh_password
+    vm_id       = var.vm_id
+    script_hash = sha256(local.configure_static_ip_script)
   }
 
   connection {
     type     = "ssh"
-    host     = self.triggers_replace.ssh_host
-    port     = self.triggers_replace.ssh_port
-    user     = self.triggers_replace.ssh_user
-    password = self.triggers_replace.ssh_password
+    host     = local.pve_ssh_host
+    port     = local.pve_ssh_port
+    user     = local.pve_ssh_user
+    password = local.pve_ssh_password
   }
 
-  // 等 guest agent 起来 -> 改 NM 连接 -> 重新激活
-  // HAOS 启动到 supervisor 起来大约 1-2 分钟，guest agent 更早可用
   provisioner "remote-exec" {
-    inline = [
-      "set -euo pipefail",
-      "VMID='${self.triggers_replace.vm_id}'",
-      "IFACE='${self.triggers_replace.interface_name}'",
-      "CONN_NAME=\"Supervisor $IFACE\"",
-      // 等 guest agent 至多 5 分钟
-      "echo '[+] waiting qemu-guest-agent on VM '$VMID",
-      "for i in $(seq 1 60); do",
-      "  if qm guest cmd $VMID ping >/dev/null 2>&1; then echo '    agent up after '$((i*5))'s'; break; fi",
-      "  sleep 5",
-      "done",
-      "qm guest cmd $VMID ping >/dev/null 2>&1 || { echo 'guest agent not responding' >&2; exit 1; }",
-      // 等 NetworkManager 起来并加载出厂 Supervisor 连接（HA Supervisor 反推下来）
-      "echo '[+] waiting NetworkManager Supervisor connection'",
-      "for i in $(seq 1 60); do",
-      "  if qm guest exec $VMID -- /bin/sh -c \"nmcli -t -f NAME con show | grep -qx 'Supervisor $IFACE'\" 2>/dev/null | grep -q '\"exitcode\" : 0'; then echo '    Supervisor conn ready after '$((i*5))'s'; break; fi",
-      "  sleep 5",
-      "done",
-      // 改 IP + 重新激活；nmcli 设置 manual 时必须同时给 addresses
-      "echo '[+] applying static IP via nmcli'",
-      "qm guest exec $VMID -- /bin/sh -c \"nmcli con modify '$CONN_NAME' ipv4.method manual ipv4.addresses '${self.triggers_replace.ipv4_address}/${self.triggers_replace.ipv4_cidr}' ipv4.gateway '${self.triggers_replace.ipv4_gateway}' ipv4.dns '${self.triggers_replace.ipv4_dns_csv}' && nmcli con reload && nmcli con up '$CONN_NAME'\"",
-      "echo '[+] done'",
-    ]
+    inline = [local.configure_static_ip_script]
+  }
+}
+
+// =============================================================================
+// 4. 通过 qm guest exec 给 HA 注入 trusted_proxies
+//    用于反代场景：nginx -> HA 时 HA 必须信任反代源 IP，否则被拒。
+//    幂等设计：onboarding 未完成时（configuration.yaml 不存在）静默跳过，
+//             onboarding 完成后再 apply 才生效；后续重跑只在内容变化时改。
+// =============================================================================
+locals {
+  trusted_proxies_marker_begin = "BEGIN terraform-managed trusted_proxies"
+  trusted_proxies_marker_end   = "END terraform-managed trusted_proxies"
+
+  trusted_proxies_yaml_block = join("\n", concat(
+    ["# ${local.trusted_proxies_marker_begin}", "http:", "  use_x_forwarded_for: true", "  trusted_proxies:"],
+    [for p in var.trusted_proxies : "    - ${p}"],
+    ["# ${local.trusted_proxies_marker_end}"]
+  ))
+
+  inject_trusted_proxies_script = templatefile(
+    "${path.module}/scripts/inject_trusted_proxies.sh.tpl",
+    {
+      vm_id        = var.vm_id
+      config_path  = var.ha_config_path
+      marker_begin = local.trusted_proxies_marker_begin
+      marker_end   = local.trusted_proxies_marker_end
+      yaml_block   = local.trusted_proxies_yaml_block
+    }
+  )
+}
+
+resource "terraform_data" "inject_trusted_proxies" {
+  count = length(var.trusted_proxies) > 0 ? 1 : 0
+
+  depends_on = [terraform_data.configure_static_ip]
+
+  triggers_replace = {
+    vm_id       = var.vm_id
+    script_hash = sha256(local.inject_trusted_proxies_script)
+  }
+
+  connection {
+    type     = "ssh"
+    host     = local.pve_ssh_host
+    port     = local.pve_ssh_port
+    user     = local.pve_ssh_user
+    password = local.pve_ssh_password
+  }
+
+  provisioner "remote-exec" {
+    inline = [local.inject_trusted_proxies_script]
   }
 }
