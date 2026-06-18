@@ -1,8 +1,19 @@
 // =============================================================================
+// Home Assistant OS VM 模块
+//
+// 难点：HAOS 不支持 cloud-init（基于 Buildroot 的极简只读镜像，无 Python）。
+// 它原生有一个 `hassos-config.service`（也叫 haos-config）会在启动时检查
+// LABEL=CONFIG 的 USB/CD 卷，把 network/*.nmconnection 拷贝到
+// /etc/NetworkManager/system-connections/。但实测 HAOS 17.x 在拷贝完成后，
+// HA Supervisor 容器仍会通过 NM DBus 把 enp* 接口重置回 DHCP（出厂模板）。
+// 所以模块走"先让 VM 起来拿 DHCP IP -> 通过 qemu-guest-agent 直接改 NM
+// 连接为 manual"的路子，比 CONFIG ISO 注入可靠。
+//
 // 准备工作均在 PVE 宿主机上完成（通过 SSH）：
 //   1. 下载并解压 HAOS qcow2 镜像 -> /var/lib/vz/import/
-//   2. 用 genisoimage 构造卷标为 CONFIG 的 ISO -> /var/lib/vz/template/iso/
-// 这样模块对本地工具链零依赖，也省掉 proxmox_virtual_environment_file 上传环节。
+//   2. 创建 VM
+//   3. 通过 qm guest exec 让 HAOS 内部把出厂 `Supervisor <iface>` 连接
+//      改成 manual + 静态 IP，并重新激活
 // =============================================================================
 
 // SSH 连接参数（多个资源复用，写在一起避免漂移）
@@ -35,6 +46,8 @@ resource "terraform_data" "haos_image_prepare" {
   provisioner "remote-exec" {
     inline = [
       "set -euo pipefail",
+      var.download_proxy == null ? "true" : "export http_proxy='${var.download_proxy.http_proxy}'",
+      var.download_proxy == null ? "true" : "export https_proxy='${var.download_proxy.https_proxy}'",
       "TARGET_DIR=/var/lib/vz/import",
       "mkdir -p \"$TARGET_DIR\"",
       "TARGET_FILE=\"$TARGET_DIR/haos_ova-${self.triggers_replace.haos_version}.qcow2\"",
@@ -55,77 +68,10 @@ locals {
 }
 
 // =============================================================================
-// 2. 在 PVE 宿主机上构造 CONFIG ISO
-//    HAOS 第一次启动时 haos-config.service 会读取 LABEL=CONFIG 的卷，
-//    把 network/*.nmconnection 拷贝到 /etc/NetworkManager/system-connections/。
-// =============================================================================
-locals {
-  nmconnection_content = templatefile("${path.module}/templates/static-ethernet.nmconnection.tftpl", {
-    ipv4_address = var.ipv4_address
-    ipv4_cidr    = var.ipv4_address_cidr
-    ipv4_gateway = var.ipv4_gateway
-    ipv4_dns     = var.ipv4_dns
-  })
-
-  // 同一个 PVE 上多 HA VM 时按 vm_id 隔离
-  config_iso_file_name = "haos-config-${var.vm_id}.iso"
-  config_iso_remote    = "/var/lib/vz/template/iso/${local.config_iso_file_name}"
-  config_iso_file_id   = "${var.config_iso_datastore_id}:iso/${local.config_iso_file_name}"
-}
-
-resource "terraform_data" "config_iso_build" {
-  triggers_replace = {
-    content      = sha256(local.nmconnection_content)
-    iso_path     = local.config_iso_remote
-    datastore_id = var.config_iso_datastore_id
-    ssh_host     = local.pve_ssh_host
-    ssh_port     = local.pve_ssh_port
-    ssh_user     = local.pve_ssh_user
-    ssh_password = local.pve_ssh_password
-  }
-
-  connection {
-    type     = "ssh"
-    host     = self.triggers_replace.ssh_host
-    port     = self.triggers_replace.ssh_port
-    user     = self.triggers_replace.ssh_user
-    password = self.triggers_replace.ssh_password
-  }
-
-  // 把 nmconnection 内容写到宿主机临时目录，再 mkisofs 打包
-  // 注意：HAOS 的 haos-config 脚本对 LABEL=CONFIG 大小写敏感
-  provisioner "remote-exec" {
-    inline = [
-      "set -euo pipefail",
-      "WORKDIR=$(mktemp -d)",
-      "trap 'rm -rf \"$WORKDIR\"' EXIT",
-      "mkdir -p \"$WORKDIR/network\"",
-      "cat > \"$WORKDIR/network/static-ethernet.nmconnection\" <<'NMCFG'\n${local.nmconnection_content}\nNMCFG",
-      "chmod 600 \"$WORKDIR/network/static-ethernet.nmconnection\"",
-      "mkdir -p \"$(dirname '${self.triggers_replace.iso_path}')\"",
-      "if command -v genisoimage >/dev/null 2>&1; then ISO_CMD=genisoimage; elif command -v mkisofs >/dev/null 2>&1; then ISO_CMD=mkisofs; elif command -v xorriso >/dev/null 2>&1; then ISO_CMD='xorriso -as mkisofs'; else echo 'No ISO tool found (install genisoimage/mkisofs/xorriso on PVE host)' >&2; exit 1; fi",
-      "$ISO_CMD -V CONFIG -J -r -o '${self.triggers_replace.iso_path}' \"$WORKDIR\"",
-      "ls -lh '${self.triggers_replace.iso_path}'",
-    ]
-  }
-
-  // 销毁时清理 ISO（每个 VM 独享，按 vm_id 命名）
-  provisioner "remote-exec" {
-    when = destroy
-    inline = [
-      "rm -f '${self.triggers_replace.iso_path}'",
-    ]
-  }
-}
-
-// =============================================================================
-// 3. 创建 Home Assistant OS 虚拟机
+// 2. 创建 Home Assistant OS 虚拟机
 // =============================================================================
 resource "proxmox_virtual_environment_vm" "home_assistant" {
-  depends_on = [
-    terraform_data.haos_image_prepare,
-    terraform_data.config_iso_build,
-  ]
+  depends_on = [terraform_data.haos_image_prepare]
 
   node_name   = var.pve_node_name
   vm_id       = var.vm_id
@@ -180,13 +126,6 @@ resource "proxmox_virtual_environment_vm" "home_assistant" {
 
   scsi_hardware = "virtio-scsi-single"
 
-  // CD-ROM：挂载 CONFIG ISO 用于首次启动注入网络配置
-  // q35 机型仅支持 ide0 / ide2
-  cdrom {
-    file_id   = local.config_iso_file_id
-    interface = "ide2"
-  }
-
   // USB 直通（Zigbee / Z-Wave / 蓝牙 dongle）
   dynamic "usb" {
     for_each = var.usb_devices
@@ -204,6 +143,68 @@ resource "proxmox_virtual_environment_vm" "home_assistant" {
   lifecycle {
     ignore_changes = [
       disk,
+    ]
+  }
+}
+
+// =============================================================================
+// 3. 通过 qm guest exec 给 HAOS 注入静态 IP
+//    HAOS 出厂自带一个 `Supervisor <iface>` NetworkManager 连接（DHCP），
+//    我们用 `nmcli con modify` 把它改成 manual + 我们的 IP，再重新激活。
+//    比往 LABEL=CONFIG 卷拷文件更可靠：
+//      - hassos-config 拷贝完成后，HA Supervisor 仍可能经 DBus 重置回 DHCP
+//      - 直接改活跃连接，立即生效，不需要重启
+// =============================================================================
+resource "terraform_data" "configure_static_ip" {
+  depends_on = [proxmox_virtual_environment_vm.home_assistant]
+
+  triggers_replace = {
+    vm_id          = var.vm_id
+    interface_name = var.interface_name
+    ipv4_address   = var.ipv4_address
+    ipv4_cidr      = var.ipv4_address_cidr
+    ipv4_gateway   = var.ipv4_gateway
+    // nmcli ipv4.dns 用逗号分隔，模板里是分号给 keyfile 用
+    ipv4_dns_csv = replace(var.ipv4_dns, ";", ",")
+    ssh_host     = local.pve_ssh_host
+    ssh_port     = local.pve_ssh_port
+    ssh_user     = local.pve_ssh_user
+    ssh_password = local.pve_ssh_password
+  }
+
+  connection {
+    type     = "ssh"
+    host     = self.triggers_replace.ssh_host
+    port     = self.triggers_replace.ssh_port
+    user     = self.triggers_replace.ssh_user
+    password = self.triggers_replace.ssh_password
+  }
+
+  // 等 guest agent 起来 -> 改 NM 连接 -> 重新激活
+  // HAOS 启动到 supervisor 起来大约 1-2 分钟，guest agent 更早可用
+  provisioner "remote-exec" {
+    inline = [
+      "set -euo pipefail",
+      "VMID='${self.triggers_replace.vm_id}'",
+      "IFACE='${self.triggers_replace.interface_name}'",
+      "CONN_NAME=\"Supervisor $IFACE\"",
+      // 等 guest agent 至多 5 分钟
+      "echo '[+] waiting qemu-guest-agent on VM '$VMID",
+      "for i in $(seq 1 60); do",
+      "  if qm guest cmd $VMID ping >/dev/null 2>&1; then echo '    agent up after '$((i*5))'s'; break; fi",
+      "  sleep 5",
+      "done",
+      "qm guest cmd $VMID ping >/dev/null 2>&1 || { echo 'guest agent not responding' >&2; exit 1; }",
+      // 等 NetworkManager 起来并加载出厂 Supervisor 连接（HA Supervisor 反推下来）
+      "echo '[+] waiting NetworkManager Supervisor connection'",
+      "for i in $(seq 1 60); do",
+      "  if qm guest exec $VMID -- /bin/sh -c \"nmcli -t -f NAME con show | grep -qx 'Supervisor $IFACE'\" 2>/dev/null | grep -q '\"exitcode\" : 0'; then echo '    Supervisor conn ready after '$((i*5))'s'; break; fi",
+      "  sleep 5",
+      "done",
+      // 改 IP + 重新激活；nmcli 设置 manual 时必须同时给 addresses
+      "echo '[+] applying static IP via nmcli'",
+      "qm guest exec $VMID -- /bin/sh -c \"nmcli con modify '$CONN_NAME' ipv4.method manual ipv4.addresses '${self.triggers_replace.ipv4_address}/${self.triggers_replace.ipv4_cidr}' ipv4.gateway '${self.triggers_replace.ipv4_gateway}' ipv4.dns '${self.triggers_replace.ipv4_dns_csv}' && nmcli con reload && nmcli con up '$CONN_NAME'\"",
+      "echo '[+] done'",
     ]
   }
 }

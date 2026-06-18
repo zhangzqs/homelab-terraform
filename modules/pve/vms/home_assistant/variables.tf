@@ -26,19 +26,13 @@ variable "name" {
 }
 
 variable "haos_version" {
-  description = "Home Assistant OS 版本号，对应 GitHub release tag，例如 \"18.0\""
+  description = "Home Assistant OS 版本号，对应 GitHub release tag，例如 \"17.3\""
   type        = string
-  default     = "18.0"
+  default     = "17.3"
 }
 
 variable "haos_image_datastore_id" {
   description = "存放 HAOS qcow2 镜像的 datastore（仅供首次 import，使用 PVE 默认 ISO 目录式存储）"
-  type        = string
-  default     = "local"
-}
-
-variable "config_iso_datastore_id" {
-  description = "存放 CONFIG 注入 ISO 的 datastore"
   type        = string
   default     = "local"
 }
@@ -83,6 +77,12 @@ variable "ipv4_dns" {
   default     = "223.5.5.5;119.29.29.29"
 }
 
+variable "interface_name" {
+  description = "VM 内部网卡接口名，用于在 HAOS 起来后通过 `nmcli con modify 'Supervisor <interface_name>' ...` 注入静态 IP。PVE q35 + virtio + ovmf 默认是 `enp6s18`。"
+  type        = string
+  default     = "enp6s18"
+}
+
 variable "cpu_cores" {
   description = "CPU 核心数"
   type        = number
@@ -108,4 +108,13 @@ variable "usb_devices" {
     usb3 = optional(bool, false)
   }))
   default = []
+}
+
+variable "download_proxy" {
+  description = "下载 HAOS 镜像时使用的 HTTP 代理（可选）。设置后 wget 会带 https_proxy/http_proxy。直连 GitHub 慢的内网建议指向 mihomo。"
+  type = object({
+    http_proxy  = string
+    https_proxy = string
+  })
+  default = null
 }
