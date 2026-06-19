@@ -29,6 +29,20 @@ resource "proxmox_virtual_environment_container" "mihomo_proxy_container" {
   start_on_boot = true
   unprivileged  = true # 不需要特权容器
 
+  // 透明代理网关需要 TUN 设备：
+  // - features.nesting 一并打开（mihomo 启动时会触碰 cgroup）
+  // - device_passthrough 透传宿主机 /dev/net/tun，并放行 cgroup deny-list
+  // 注：bpg/proxmox 0.93 的 features 不支持 mknod；不过 /dev/net/tun
+  // 已通过 device_passthrough 直接以节点形式投放到容器内，不需要 mknod
+  features {
+    nesting = true
+  }
+
+  device_passthrough {
+    path = "/dev/net/tun"
+    mode = "0666"
+  }
+
   initialization {
     hostname = var.hostname
 

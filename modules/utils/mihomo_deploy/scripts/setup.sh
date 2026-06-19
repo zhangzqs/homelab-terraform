@@ -17,6 +17,13 @@ fi
 
 apt-get update && apt-get install -y curl openssh-server htop
 
+# 透明代理网关需要 IP 转发，写到 /etc/sysctl.d/ 持久化
+cat > /etc/sysctl.d/99-mihomo-gateway.conf <<'EOF'
+net.ipv4.ip_forward = 1
+net.ipv6.conf.all.forwarding = 1
+EOF
+sysctl --system >/dev/null
+
 # 安装 mihomo（如果尚未安装）
 if ! command -v mihomo >/dev/null 2>&1; then
     log "正在下载并安装 mihomo..."
