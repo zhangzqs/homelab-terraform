@@ -92,6 +92,10 @@ resource "terraform_data" "setup_systemd_service" {
   triggers_replace = merge(local.common_triggers, {
     resource_type = "setup_systemd_service"
     service_hash  = sha256(local.mihomo_service_content)
+    // install_mihomo 的 destroy 会跑 uninstall.sh 删除 working_dir
+    // 和 systemd unit；它 replace 时本资源也必须跟着 replace 才能
+    // 重新 mkdir + 写 unit 文件
+    install_id = terraform_data.install_mihomo.id
   })
 
   connection {
@@ -142,6 +146,9 @@ resource "terraform_data" "update_mihomo_config" {
   triggers_replace = merge(local.common_triggers, {
     resource_type = "update_mihomo_config"
     config_hash   = sha256(var.mihomo_config_content)
+    // 当 setup_systemd_service replace 时（含 install_mihomo 重建场景），
+    // working_dir 与 unit 都被重建了，本资源也要重新上传 config.yaml + start
+    setup_id = terraform_data.setup_systemd_service.id
   })
 
   connection {
@@ -155,6 +162,16 @@ resource "terraform_data" "update_mihomo_config" {
   }
 
   # 上传 config.yaml
+  provisioner "remote-exec" {
+    inline = [
+      // setup_systemd_service 已经 mkdir 过，但若上层 install_mihomo
+      // 因 setup.sh 变更被 replace，destroy 的 uninstall.sh 会 rm -rf
+      // working_dir，而 setup_systemd_service 自身没跟着 replace 不会
+      // 重建目录。在这里防御性补一刀。
+      "mkdir -p ${var.working_dir}",
+    ]
+  }
+
   provisioner "file" {
     content     = var.mihomo_config_content
     destination = "${var.working_dir}/config.yaml"
