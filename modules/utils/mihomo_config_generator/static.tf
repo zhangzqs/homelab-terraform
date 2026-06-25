@@ -28,7 +28,6 @@ locals {
       ]
       # 绝大多数域名的默认解析服务器（直连流量默认走这里）。
       nameserver = [
-        "8.8.8.8",                          # 传统UDP DNS（谷歌）
         "https://doh.pub/dns-query",        # DoH 加密DNS（国内公共纯净DoH）
         "https://dns.alidns.com/dns-query", # 阿里 DoH 加密DNS
       ]
@@ -68,6 +67,31 @@ locals {
     "mode" = "rule"
 
     "dns" = merge(local.default_dns_config, var.dns_config)
+
+    # 域名嗅探：TUN 模式下从 TLS SNI / HTTP Host 还原真实域名，
+    # 覆盖被 DNS 污染或 fake-ip 的目标 IP，避免域名丢失导致规则误判。
+    "sniffer" = {
+      enable            = true
+      force-dns-mapping = true
+      # 对所有未获取到域名的流量进行强制嗅探
+      parse-pure-ip        = true
+      override-destination = true
+      sniff = {
+        QUIC = {
+          ports = [443]
+        }
+        TLS = {
+          ports = [443, 8443]
+        }
+        HTTP = {
+          ports                = [80, "8080-8880"]
+          override-destination = true
+        }
+        TLS = {
+          ports = [443, 8443]
+        }
+      }
+    }
 
     "geox-url" = {
       "geoip"   = "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat"
