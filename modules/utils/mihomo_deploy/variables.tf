@@ -48,9 +48,7 @@ variable "working_dir" {
 variable "mihomo_download_url" {
   description = "mihomo deb 包下载地址"
   type        = string
-  // v1.19.27 起官方 deb 默认带 openvpn 支持；v1.19.19 没有，无法解析
-  // proxy.type=openvpn 的配置
-  default = "https://gh-proxy.org/https://github.com/MetaCubeX/mihomo/releases/download/v1.19.27/mihomo-linux-amd64-v2-v1.19.27.deb"
+  default = "https://gh-proxy.org/https://github.com/MetaCubeX/mihomo/releases/download/v1.19.28/mihomo-linux-amd64-v2-v1.19.28.deb"
 }
 
 variable "mihomo_config_content" {
