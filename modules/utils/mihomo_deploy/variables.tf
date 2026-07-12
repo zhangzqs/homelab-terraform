@@ -48,7 +48,7 @@ variable "working_dir" {
 variable "mihomo_download_url" {
   description = "mihomo deb 包下载地址"
   type        = string
-  default = "https://gh-proxy.org/https://github.com/MetaCubeX/mihomo/releases/download/v1.19.28/mihomo-linux-amd64-v2-v1.19.28.deb"
+  default     = "https://gh-proxy.org/https://github.com/MetaCubeX/mihomo/releases/download/v1.19.28/mihomo-linux-amd64-v2-v1.19.28.deb"
 }
 
 variable "mihomo_config_content" {
