@@ -175,5 +175,7 @@ locals {
     "RULE-SET,telegram,${var.overseas_proxy_name}",
     "RULE-SET,lan,DIRECT",
     "GEOIP,CN,DIRECT",
+    "DOMAIN-SUFFIX,openai.com,${var.overseas_proxy_name}",
+    "DOMAIN-SUFFIX,chatgpt.com,${var.overseas_proxy_name}",
   ]
 }
