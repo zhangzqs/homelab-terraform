@@ -1,5 +1,6 @@
 locals {
   dynamic_config = {
+    "hosts"           = var.hosts
     "proxy-providers" = var.proxy_providers
     "proxy-groups"    = var.proxy_groups
     "proxies"         = var.proxies

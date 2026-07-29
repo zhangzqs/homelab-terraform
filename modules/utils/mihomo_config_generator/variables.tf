@@ -80,3 +80,9 @@ variable "dns_config" {
   type        = any
   default     = {}
 }
+
+variable "hosts" {
+  description = "静态域名解析映射（对应 Mihomo 顶层 hosts 字段）"
+  type        = any
+  default     = {}
+}
