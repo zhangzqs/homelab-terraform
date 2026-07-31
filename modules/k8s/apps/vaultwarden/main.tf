@@ -7,7 +7,7 @@ module "app" {
 
   app_name        = "vaultwarden"
   namespace       = "vaultwarden"
-  container_image = "vaultwarden/server:1.35.2"
+  container_image = "vaultwarden/server:1.37.1"
 
   container_ports = [
     {
