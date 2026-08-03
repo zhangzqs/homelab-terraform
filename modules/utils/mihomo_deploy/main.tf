@@ -27,6 +27,21 @@ locals {
   mihomo_service_content = templatefile("${path.module}/templates/mihomo.service.tpl", {
     working_dir = var.working_dir,
   })
+
+  # mihomo 自身没有日志滚动能力，systemd 又是 append: 模式持有文件句柄，
+  # 这里用 logrotate + copytruncate 兜底，防止日志无限增长撑爆磁盘
+  logrotate_config = <<-EOT
+    ${var.working_dir}/mihomo.log {
+        daily
+        maxsize 50M
+        rotate 2
+        missingok
+        notifempty
+        compress
+        delaycompress
+        copytruncate
+    }
+  EOT
 }
 
 # --------------------------------------------------
@@ -200,6 +215,48 @@ resource "terraform_data" "update_mihomo_config" {
     when = destroy
     inline = [
       "rm -f ${self.triggers_replace.working_dir}/config.yaml 2>/dev/null || true",
+    ]
+  }
+}
+
+# --------------------------------------------------
+# 4. 配置日志滚动（防御日志无限增长撑爆磁盘）
+# --------------------------------------------------
+resource "terraform_data" "setup_logrotate" {
+  triggers_replace = merge(local.common_triggers, {
+    resource_type  = "setup_logrotate"
+    logrotate_hash = md5(local.logrotate_config)
+  })
+
+  connection {
+    type        = "ssh"
+    host        = self.triggers_replace.ssh_host
+    port        = tonumber(self.triggers_replace.ssh_port)
+    user        = self.triggers_replace.ssh_user
+    password    = self.triggers_replace.ssh_password != "" ? self.triggers_replace.ssh_password : null
+    private_key = self.triggers_replace.ssh_private_key != "" ? self.triggers_replace.ssh_private_key : null
+    timeout     = "2m"
+  }
+
+  # 上传 logrotate 配置
+  provisioner "file" {
+    content     = local.logrotate_config
+    destination = "/etc/logrotate.d/mihomo"
+  }
+
+  # 确保 logrotate 已安装，并校验配置语法（--debug 为 dry-run，不做实际变更）
+  provisioner "remote-exec" {
+    inline = [
+      "command -v logrotate >/dev/null 2>&1 || (apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y logrotate)",
+      "logrotate --debug /etc/logrotate.d/mihomo",
+    ]
+  }
+
+  # ----- 销毁时：移除 logrotate 配置 -----
+  provisioner "remote-exec" {
+    when = destroy
+    inline = [
+      "rm -f /etc/logrotate.d/mihomo",
     ]
   }
 }
