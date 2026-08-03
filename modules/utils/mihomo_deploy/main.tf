@@ -145,7 +145,7 @@ resource "terraform_data" "update_mihomo_config" {
 
   triggers_replace = merge(local.common_triggers, {
     resource_type = "update_mihomo_config"
-    config_hash   = sha256(var.mihomo_config_content)
+    config        = var.mihomo_config_content
     // 当 setup_systemd_service replace 时（含 install_mihomo 重建场景），
     // working_dir 与 unit 都被重建了，本资源也要重新上传 config.yaml + start
     setup_id = terraform_data.setup_systemd_service.id
