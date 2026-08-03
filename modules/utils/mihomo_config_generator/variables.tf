@@ -86,3 +86,14 @@ variable "hosts" {
   type        = any
   default     = {}
 }
+
+variable "log_level" {
+  description = "日志级别（silent/error/warning/info/debug）。默认 warning：debug 级别在 TUN 全流量场景下日志增长极快，曾撑爆 LXC 磁盘"
+  type        = string
+  default     = "warning"
+
+  validation {
+    condition     = contains(["silent", "error", "warning", "info", "debug"], var.log_level)
+    error_message = "log_level 必须是 silent/error/warning/info/debug 之一"
+  }
+}

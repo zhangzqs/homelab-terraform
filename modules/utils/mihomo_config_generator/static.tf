@@ -102,7 +102,7 @@ locals {
     "geo-auto-update"     = true
     "geo-update-interval" = 24
 
-    "log-level" = "debug"
+    "log-level" = var.log_level
     "ipv6"      = true
 
     "external-controller" = var.external_controller
