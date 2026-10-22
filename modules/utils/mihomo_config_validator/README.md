@@ -32,4 +32,6 @@ output "config_content" {
 配置内容或镜像变化时，触发 `before_create` / `before_update` Action，以标准输入
 执行 `docker run --rm -i <镜像> -t -f -`。无变更的 apply 不重复校验。
 校验失败会使 apply 报错，依赖该输出的资源不会收到无效配置。
+失败时会将 Docker/Mihomo 的 stdout 和 stderr 一并显示在 Terraform 错误诊断中，
+并保留原始退出码；成功时仍显示校验日志。
 校验仅检查内核配置解析，不测试代理节点的连通性。
